@@ -18,7 +18,6 @@ namespace BurgerRoyale.IOC.Configurations
 		{
 			#region Services
 
-			services.AddScoped<IUserService, UserService>();
 			services.AddScoped<IProductService, ProductService>();
 			services.AddScoped<IOrderService, OrderService>();
 			services.AddScoped<IPaymentServiceIntegration, PaymentServiceIntegration>();
@@ -27,7 +26,6 @@ namespace BurgerRoyale.IOC.Configurations
 
 			#region Repositories
 
-			services.AddScoped<IUserRepository, UserRepository>();
 			services.AddScoped<IProductRepository, ProductRepository>();
 			services.AddScoped<IProductImageRepository, ProductImageRepository>();
 			services.AddScoped<IOrderRepository, OrderRepository>();

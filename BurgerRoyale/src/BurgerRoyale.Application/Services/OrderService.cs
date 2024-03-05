@@ -12,25 +12,22 @@ public class OrderService : IOrderService
 {
     private readonly IOrderRepository _orderRepository;
     private readonly IProductRepository _productRepository;
-    private readonly IUserRepository _userRepository;
     private readonly IPaymentServiceIntegration _paymentServiceIntegration;
 
     public OrderService(
         IOrderRepository orderRepository,
         IProductRepository productRepository,
-        IUserRepository userRepository,
         IPaymentServiceIntegration paymentServiceIntegration
     )
     {
         _orderRepository = orderRepository;
         _productRepository = productRepository;
-        _userRepository = userRepository;
         _paymentServiceIntegration = paymentServiceIntegration;
     }
 
     public async Task<OrderDTO> CreateAsync(CreateOrderDTO orderDTO)
     {
-        Order order = await CreateOrder(orderDTO);
+        Order order = CreateOrder(orderDTO);
 
         await AddOrderProductsToOrder(orderDTO, order);
 
@@ -43,28 +40,14 @@ public class OrderService : IOrderService
         return new OrderDTO(order);
     }
 
-    private async Task<Order> CreateOrder(CreateOrderDTO orderDTO)
+    private Order CreateOrder(CreateOrderDTO orderDTO)
     {
-        if (UserIsDefined(orderDTO))
+        if (orderDTO.UserId.HasValue && orderDTO.UserId != Guid.Empty)
         {
-            var user = await _userRepository.GetByIdAsync(orderDTO.UserId!.Value);
-            ValidateIfUserDoesNotExist(user);
-
             return CreateOrderWithUser(orderDTO.UserId.Value);
         }
 
         return CreateOrderWithoutUser();
-    }
-
-    private static bool UserIsDefined(CreateOrderDTO orderDTO)
-    {
-        return orderDTO.UserId.HasValue && orderDTO.UserId != Guid.Empty;
-    }
-
-    private static void ValidateIfUserDoesNotExist(User? user)
-    {
-        if (user is null)
-            throw new NotFoundException("Usuário não encontrado.");
     }
 
     private static Order CreateOrderWithUser(Guid userId)

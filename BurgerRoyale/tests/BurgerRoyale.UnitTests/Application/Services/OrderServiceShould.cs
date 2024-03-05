@@ -14,7 +14,6 @@ public class OrderServiceShould
 {
     private readonly Mock<IOrderRepository> orderRepositoryMock;
     private readonly Mock<IProductRepository> productRepositoryMock;
-    private readonly Mock<IUserRepository> userRepositoryMock;
     private readonly Mock<IPaymentServiceIntegration> paymentServiceIntegrationMock;
     private readonly IOrderService orderService;
 
@@ -22,13 +21,11 @@ public class OrderServiceShould
     {
         orderRepositoryMock = new Mock<IOrderRepository>();
         productRepositoryMock = new Mock<IProductRepository>();
-        userRepositoryMock = new Mock<IUserRepository>();
         paymentServiceIntegrationMock = new Mock<IPaymentServiceIntegration>();
 
         orderService = new OrderService(
             orderRepositoryMock.Object, 
-            productRepositoryMock.Object, 
-            userRepositoryMock.Object,
+            productRepositoryMock.Object,
             paymentServiceIntegrationMock.Object);
     }
 
@@ -39,11 +36,6 @@ public class OrderServiceShould
 
         // Usuário
         var userId = Guid.NewGuid();
-        var user = new User("52998224725", "Mike", "mike@gmail.com", UserType.Customer);
-
-        userRepositoryMock
-            .Setup(x => x.GetByIdAsync(userId))
-            .ReturnsAsync(user);
 
         //Produto
         var productId = Guid.NewGuid();
@@ -98,12 +90,6 @@ public class OrderServiceShould
     {
         #region Arrange(Given)
 
-        var user = new User("52998224725", "Mike", "mike@gmail.com", UserType.Customer);
-
-        userRepositoryMock
-            .Setup(x => x.GetByIdAsync(user.Id))
-            .ReturnsAsync(user);
-
         var product = new Product("Burger", "Big burger", 20, ProductCategory.Lanche);
 
         productRepositoryMock
@@ -112,7 +98,7 @@ public class OrderServiceShould
 
         CreateOrderDTO orderDTO = new()
         {
-            UserId = user.Id,
+            UserId = Guid.NewGuid(),
             OrderProducts = new CreateOrderProductDTO[]
             {
                 new()
@@ -143,72 +129,12 @@ public class OrderServiceShould
     }
 
     [Fact]
-    public async Task CreateOrder_WithInvalidUser_ThenShouldGiveAnException()
-    {
-        #region Arrange(Given)
-
-        // Usuário
-        var userId = Guid.NewGuid();
-        var user = new User("52998224725", "Mike", "mike@gmail.com", UserType.Customer);
-
-        userRepositoryMock
-            .Setup(x => x.GetByIdAsync(userId))
-            .ReturnsAsync(user);
-
-        //Produto
-        var productId = Guid.NewGuid();
-        var product = new Product("Burger", "Big burger", 20, ProductCategory.Lanche);
-
-        productRepositoryMock
-            .Setup(x => x.GetByIdAsync(productId))
-            .ReturnsAsync(product);
-
-        CreateOrderProductDTO orderProduct = new CreateOrderProductDTO()
-        {
-            ProductId = productId,
-            Quantity = 1
-        };
-
-        var orderProducts = new List<CreateOrderProductDTO>
-        {
-            orderProduct
-        };
-
-        //Pedido
-        CreateOrderDTO orderDTO = new()
-        {
-            UserId = Guid.NewGuid(),
-            OrderProducts = orderProducts
-        };
-
-        #endregion Arrange(Given)
-
-        #region Act(When)
-
-        var exception = await Record.ExceptionAsync(async () => await orderService.CreateAsync(orderDTO));
-
-        #endregion Act(When)
-
-        #region Assert(Then)
-
-        Assert.NotNull(exception);
-        Assert.Equal("Usuário não encontrado.", exception.Message);
-
-        #endregion Assert(Then)
-    }
-
-    [Fact]
     public async Task CreateOrder_WithInvalidProduct_ThenShouldGiveAnException()
     {
         #region Arrange(Given)
 
         // Usuário
         var userId = Guid.NewGuid();
-        var user = new User("52998224725", "Mike", "mike@gmail.com", UserType.Customer);
-
-        userRepositoryMock
-            .Setup(x => x.GetByIdAsync(userId))
-            .ReturnsAsync(user);
 
         //Produto
         var productId = Guid.NewGuid();
