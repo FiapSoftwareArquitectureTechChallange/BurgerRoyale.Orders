@@ -1,14 +1,17 @@
 ﻿using BurgerRoyale.API.ConfigController;
+using BurgerRoyale.Domain.Constants;
 using BurgerRoyale.Domain.DTO;
 using BurgerRoyale.Domain.Enumerators;
 using BurgerRoyale.Domain.Interface.Services;
 using BurgerRoyale.Domain.ResponseDefault;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
 
 namespace BurgerRoyale.API.Controllers.Product
 {
+	[Authorize(Roles = $"{RolesConstants.Admin},{RolesConstants.Employee}")]
     [Route("api/[controller]")]
 	[ApiController]
 	public class ProductController : BaseController
@@ -20,6 +23,7 @@ namespace BurgerRoyale.API.Controllers.Product
 			_productService = productService;
 		}
 
+		[AllowAnonymous]
 		[HttpGet]
         [SwaggerOperation(Summary = "Get a list of products", Description = "Retrieves a list of products based on the specified category.")]
         [ProducesResponseType(typeof(IEnumerable<ReturnAPI<ProductDTO>>), StatusCodes.Status200OK)]

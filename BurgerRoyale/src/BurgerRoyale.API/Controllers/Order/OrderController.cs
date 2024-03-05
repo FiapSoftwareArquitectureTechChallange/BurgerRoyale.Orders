@@ -1,15 +1,17 @@
 ﻿using BurgerRoyale.API.ConfigController;
+using BurgerRoyale.Domain.Constants;
 using BurgerRoyale.Domain.DTO;
 using BurgerRoyale.Domain.Enumerators;
 using BurgerRoyale.Domain.Interface.Services;
 using BurgerRoyale.Domain.ResponseDefault;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
 
 namespace BurgerRoyale.API.Controllers.Order
 {
-	[Route("api/[controller]")]
+    [Route("api/[controller]")]
 	[ApiController]
 	public class OrderController : BaseController
 	{
@@ -59,7 +61,8 @@ namespace BurgerRoyale.API.Controllers.Order
 			);
 		}
 
-		[HttpPut("{id:Guid}")]
+        [Authorize(Roles = $"{RolesConstants.Admin},{RolesConstants.Employee}")]
+        [HttpPut("{id:Guid}")]
 		[SwaggerOperation(Summary = "Update an order", Description = "Updates an existing order by its ID.")]
 		[ProducesResponseType(typeof(ReturnAPI<HttpStatusCode>), StatusCodes.Status200OK)]
 		[ProducesResponseType(typeof(ReturnAPI), StatusCodes.Status400BadRequest)]
@@ -70,7 +73,8 @@ namespace BurgerRoyale.API.Controllers.Order
 			return IStatusCode(new ReturnAPI(HttpStatusCode.NoContent));
 		}
 
-		[HttpPost("{id:Guid}/approve")]
+        [Authorize(Roles = $"{RolesConstants.Admin},{RolesConstants.Employee}")]
+        [HttpPost("{id:Guid}/approve")]
 		[SwaggerOperation(Summary = "Approve order payment", Description = "Updates an existing order to 'Payment approved' by its ID.")]
 		[ProducesResponseType(typeof(ReturnAPI<HttpStatusCode>), StatusCodes.Status200OK)]
 		[ProducesResponseType(typeof(ReturnAPI), StatusCodes.Status400BadRequest)]
@@ -81,7 +85,8 @@ namespace BurgerRoyale.API.Controllers.Order
 			return IStatusCode(new ReturnAPI(HttpStatusCode.NoContent));
 		}
 
-		[HttpDelete("{id:Guid}")]
+        [Authorize(Roles = $"{RolesConstants.Admin},{RolesConstants.Employee}")]
+        [HttpDelete("{id:Guid}")]
 		[SwaggerOperation(Summary = "Delete an order by ID", Description = "Deletes an order by its ID.")]
 		[ProducesResponseType(typeof(ReturnAPI<HttpStatusCode>), StatusCodes.Status204NoContent)]
 		[ProducesResponseType(typeof(ReturnAPI), StatusCodes.Status400BadRequest)]
