@@ -3,10 +3,10 @@ using BurgerRoyale.Domain.Helpers;
 
 namespace BurgerRoyale.Domain.DTO
 {
-	public class OrderDTO
+    public class OrderDTO
 	{
 		public Guid OrderId { get; set; }
-		public Guid UserId { get; set; }
+		public Guid? UserId { get; set; }
 		public string Status { get; set; }
 		public DateTime OrderTime { get; set; }
 		public DateTime? CloseTime { get; set; }
@@ -25,7 +25,6 @@ namespace BurgerRoyale.Domain.DTO
 			OrderProducts = order.OrderProducts.Select(orderProduct => new OrderProductDTO(orderProduct));
 			OrderNumber = order.OrderNumber;
 			TotalPrice = order.TotalPrice;
-			PaymentRequestId = order.PaymentRequestId;
 		}
 	}
 }

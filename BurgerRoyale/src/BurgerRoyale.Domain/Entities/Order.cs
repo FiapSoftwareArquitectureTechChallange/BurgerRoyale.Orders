@@ -5,13 +5,12 @@ namespace BurgerRoyale.Domain.Entities;
 
 public class Order : Entity
 {
-    public Guid UserId { get; private set; }
+    public Guid? UserId { get; private set; }
     public DateTime OrderTime { get; private set; }
     public DateTime? CloseTime { get; private set; }
     public OrderStatus Status { get; private set; }
     public int OrderNumber { get; private set; }
     public virtual List<OrderProduct> OrderProducts { get; private set; } = new List<OrderProduct>();
-    public Guid? PaymentRequestId { get; private set; }
 
     public decimal TotalPrice
     {
@@ -21,7 +20,7 @@ public class Order : Entity
         }
     }
 
-    public Order(Guid userId)
+    public Order(Guid? userId)
     {
         UserId = userId;
         OrderTime = DateTime.Now;
@@ -61,10 +60,5 @@ public class Order : Entity
     public void OpenOrder()
     {
         CloseTime = null;
-    }
-
-    public void SetPaymentRequestId(Guid paymentRequestId)
-    {
-        PaymentRequestId = paymentRequestId;
     }
 }

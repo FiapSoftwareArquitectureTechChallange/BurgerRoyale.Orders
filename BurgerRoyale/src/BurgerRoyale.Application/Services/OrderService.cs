@@ -1,10 +1,13 @@
-﻿using BurgerRoyale.Domain.DTO;
+﻿using BurgerRoyale.Domain.Constants;
+using BurgerRoyale.Domain.DTO;
 using BurgerRoyale.Domain.Entities;
 using BurgerRoyale.Domain.Enumerators;
 using BurgerRoyale.Domain.Exceptions;
 using BurgerRoyale.Domain.Helpers;
 using BurgerRoyale.Domain.Interface.Repositories;
 using BurgerRoyale.Domain.Interface.Services;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace BurgerRoyale.Application.Services;
 
@@ -12,17 +15,17 @@ public class OrderService : IOrderService
 {
     private readonly IOrderRepository _orderRepository;
     private readonly IProductRepository _productRepository;
-    private readonly IPaymentServiceIntegration _paymentServiceIntegration;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public OrderService(
         IOrderRepository orderRepository,
         IProductRepository productRepository,
-        IPaymentServiceIntegration paymentServiceIntegration
+        IHttpContextAccessor httpContextAccessor
     )
     {
         _orderRepository = orderRepository;
         _productRepository = productRepository;
-        _paymentServiceIntegration = paymentServiceIntegration;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<OrderDTO> CreateAsync(CreateOrderDTO orderDTO)
@@ -35,29 +38,14 @@ public class OrderService : IOrderService
 
         await _orderRepository.AddAsync(order);
 
-        await RequestPayment(order);
-
         return new OrderDTO(order);
     }
 
     private Order CreateOrder(CreateOrderDTO orderDTO)
     {
-        if (orderDTO.UserId.HasValue && orderDTO.UserId != Guid.Empty)
-        {
-            return CreateOrderWithUser(orderDTO.UserId.Value);
-        }
+        var userId = GetLoggedUserId();
 
-        return CreateOrderWithoutUser();
-    }
-
-    private static Order CreateOrderWithUser(Guid userId)
-    {
         return new Order(userId);
-    }
-
-    private static Order CreateOrderWithoutUser()
-    {
-        return new Order(Guid.Empty);
     }
 
     private async Task AddOrderProductsToOrder(CreateOrderDTO orderDTO, Order order)
@@ -90,21 +78,11 @@ public class OrderService : IOrderService
         return 1;
     }
 
-    private async Task RequestPayment(Order order)
-    {
-        var paymentRequestId = await _paymentServiceIntegration.CreateRequestPaymentAsync(
-            order.TotalPrice,
-            order.Id
-        );
-
-        order.SetPaymentRequestId(paymentRequestId);
-
-        await _orderRepository.UpdateAsync(order);
-    }
-
     public async Task<IEnumerable<OrderDTO>> GetOrdersAsync(OrderStatus? orderStatus)
     {
-        var orders = await _orderRepository.GetOrders(orderStatus);
+        var userId = IsCustomer() ? GetLoggedUserId() : null;
+
+        var orders = await _orderRepository.GetOrders(orderStatus, userId);
 
         var orderDTOs = orders.Select(order => new OrderDTO(order)).ToList();
 
@@ -113,7 +91,9 @@ public class OrderService : IOrderService
 
     public async Task<OrderDTO> GetOrderAsync(Guid id)
     {
-        var order = await _orderRepository.GetOrder(id);
+        var userId = IsCustomer() ? GetLoggedUserId() : null;
+
+        var order = await _orderRepository.GetOrder(id, userId);
 
         ValidateIfOrderDoesNotExist(order);
 
@@ -152,5 +132,24 @@ public class OrderService : IOrderService
     {
         if (order.Status == orderStatus)
             throw new DomainException($"Pedido já possui status {orderStatus.GetDescription()}");
+    }
+
+    private Guid? GetLoggedUserId()
+    {
+        var claim = _httpContextAccessor.HttpContext?.User.Claims.FirstOrDefault(
+            x => x.Type == ClaimTypes.NameIdentifier
+        );
+
+        if (Guid.TryParse(claim?.Value, out Guid userId))
+        {
+            return userId;
+        }
+
+        return null;
+    }
+
+    private bool IsCustomer()
+    {
+        return _httpContextAccessor.HttpContext?.User?.IsInRole(RolesConstants.Customer) ?? false;
     }
 }

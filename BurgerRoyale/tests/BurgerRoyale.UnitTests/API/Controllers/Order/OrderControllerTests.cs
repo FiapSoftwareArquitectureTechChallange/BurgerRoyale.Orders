@@ -48,10 +48,7 @@ namespace BurgerRoyale.UnitTests.API.Controllers.Order
             // arrange
             var order = OrderMock.Get();
 
-            var request = new CreateOrderDTO()
-            {
-                UserId = order.UserId
-            };
+            var request = new CreateOrderDTO();
 
             // act
             var response = await _orderController.CreateOrder(request) as ObjectResult;
