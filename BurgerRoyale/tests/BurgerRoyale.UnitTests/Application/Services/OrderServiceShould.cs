@@ -5,6 +5,7 @@ using BurgerRoyale.Domain.Enumerators;
 using BurgerRoyale.Domain.Helpers;
 using BurgerRoyale.Domain.Interface.Repositories;
 using BurgerRoyale.Domain.Interface.Services;
+using Microsoft.AspNetCore.Http;
 using Moq;
 using Xunit;
 
@@ -12,24 +13,23 @@ namespace BurgerRoyale.UnitTests.Application.Services;
 
 public class OrderServiceShould
 {
-    private readonly Mock<IOrderRepository> orderRepositoryMock;
-    private readonly Mock<IProductRepository> productRepositoryMock;
-    private readonly Mock<IUserRepository> userRepositoryMock;
-    private readonly Mock<IPaymentServiceIntegration> paymentServiceIntegrationMock;
-    private readonly IOrderService orderService;
+    private readonly Mock<IOrderRepository> _orderRepositoryMock;
+    private readonly Mock<IProductRepository> _productRepositoryMock;
+    private readonly Mock<IHttpContextAccessor> _httpContextAccessor;
+
+    private readonly IOrderService _orderService;
 
     public OrderServiceShould()
     {
-        orderRepositoryMock = new Mock<IOrderRepository>();
-        productRepositoryMock = new Mock<IProductRepository>();
-        userRepositoryMock = new Mock<IUserRepository>();
-        paymentServiceIntegrationMock = new Mock<IPaymentServiceIntegration>();
+        _orderRepositoryMock = new Mock<IOrderRepository>();
+        _productRepositoryMock = new Mock<IProductRepository>();
+        _httpContextAccessor = new Mock<IHttpContextAccessor>();
 
-        orderService = new OrderService(
-            orderRepositoryMock.Object, 
-            productRepositoryMock.Object, 
-            userRepositoryMock.Object,
-            paymentServiceIntegrationMock.Object);
+        _orderService = new OrderService(
+            _orderRepositoryMock.Object, 
+            _productRepositoryMock.Object,
+            _httpContextAccessor.Object
+        );
     }
 
     [Fact]
@@ -39,17 +39,12 @@ public class OrderServiceShould
 
         // Usuário
         var userId = Guid.NewGuid();
-        var user = new User("52998224725", "Mike", "mike@gmail.com", UserType.Customer);
-
-        userRepositoryMock
-            .Setup(x => x.GetByIdAsync(userId))
-            .ReturnsAsync(user);
 
         //Produto
         var productId = Guid.NewGuid();
         var product = new Product("Burger", "Big burger", 20, ProductCategory.Lanche);
 
-        productRepositoryMock
+        _productRepositoryMock
             .Setup(x => x.GetByIdAsync(productId))
             .ReturnsAsync(product);
 
@@ -67,7 +62,6 @@ public class OrderServiceShould
         //Pedido
         CreateOrderDTO orderDTO = new()
         {
-            UserId = userId,
             OrderProducts = orderProducts
         };
 
@@ -75,7 +69,7 @@ public class OrderServiceShould
 
         #region Act(When)
 
-        var exception = await Record.ExceptionAsync(async () => await orderService.CreateAsync(orderDTO));
+        var exception = await Record.ExceptionAsync(async () => await _orderService.CreateAsync(orderDTO));
 
         #endregion Act(When)
 
@@ -83,116 +77,11 @@ public class OrderServiceShould
 
         Assert.Null(exception);
 
-        orderRepositoryMock
+        _orderRepositoryMock
             .Verify(
                 repository => repository.AddAsync(It.Is<Order>(order =>
-                    order.OrderProducts.Count() == 1 &&
-                    order.UserId == orderDTO.UserId)),
+                    order.OrderProducts.Count() == 1)),
                 Times.Once());
-
-        #endregion Assert(Then)
-    }
-
-    [Fact]
-    public async Task Send_Payment_Request_When_Create_Order()
-    {
-        #region Arrange(Given)
-
-        var user = new User("52998224725", "Mike", "mike@gmail.com", UserType.Customer);
-
-        userRepositoryMock
-            .Setup(x => x.GetByIdAsync(user.Id))
-            .ReturnsAsync(user);
-
-        var product = new Product("Burger", "Big burger", 20, ProductCategory.Lanche);
-
-        productRepositoryMock
-            .Setup(x => x.GetByIdAsync(product.Id))
-            .ReturnsAsync(product);
-
-        CreateOrderDTO orderDTO = new()
-        {
-            UserId = user.Id,
-            OrderProducts = new CreateOrderProductDTO[]
-            {
-                new()
-                {
-                    ProductId = product.Id,
-                    Quantity = 1
-                }
-            }
-        };
-
-        #endregion
-
-        #region Act(When)
-
-        await orderService.CreateAsync(orderDTO);
-
-        #endregion
-
-        #region Assert(Then)
-
-        paymentServiceIntegrationMock
-            .Verify(repository => repository.CreateRequestPaymentAsync(
-                It.Is<decimal>(price => price != 0),
-                It.Is<Guid>(orderId => orderId != Guid.Empty)),
-            Times.Once);
-
-        #endregion
-    }
-
-    [Fact]
-    public async Task CreateOrder_WithInvalidUser_ThenShouldGiveAnException()
-    {
-        #region Arrange(Given)
-
-        // Usuário
-        var userId = Guid.NewGuid();
-        var user = new User("52998224725", "Mike", "mike@gmail.com", UserType.Customer);
-
-        userRepositoryMock
-            .Setup(x => x.GetByIdAsync(userId))
-            .ReturnsAsync(user);
-
-        //Produto
-        var productId = Guid.NewGuid();
-        var product = new Product("Burger", "Big burger", 20, ProductCategory.Lanche);
-
-        productRepositoryMock
-            .Setup(x => x.GetByIdAsync(productId))
-            .ReturnsAsync(product);
-
-        CreateOrderProductDTO orderProduct = new CreateOrderProductDTO()
-        {
-            ProductId = productId,
-            Quantity = 1
-        };
-
-        var orderProducts = new List<CreateOrderProductDTO>
-        {
-            orderProduct
-        };
-
-        //Pedido
-        CreateOrderDTO orderDTO = new()
-        {
-            UserId = Guid.NewGuid(),
-            OrderProducts = orderProducts
-        };
-
-        #endregion Arrange(Given)
-
-        #region Act(When)
-
-        var exception = await Record.ExceptionAsync(async () => await orderService.CreateAsync(orderDTO));
-
-        #endregion Act(When)
-
-        #region Assert(Then)
-
-        Assert.NotNull(exception);
-        Assert.Equal("Usuário não encontrado.", exception.Message);
 
         #endregion Assert(Then)
     }
@@ -204,17 +93,12 @@ public class OrderServiceShould
 
         // Usuário
         var userId = Guid.NewGuid();
-        var user = new User("52998224725", "Mike", "mike@gmail.com", UserType.Customer);
-
-        userRepositoryMock
-            .Setup(x => x.GetByIdAsync(userId))
-            .ReturnsAsync(user);
 
         //Produto
         var productId = Guid.NewGuid();
         var product = new Product("Burger", "Big burger", 20, ProductCategory.Lanche);
 
-        productRepositoryMock
+        _productRepositoryMock
             .Setup(x => x.GetByIdAsync(productId))
             .ReturnsAsync(product);
 
@@ -232,7 +116,6 @@ public class OrderServiceShould
         //Pedido
         CreateOrderDTO orderDTO = new()
         {
-            UserId = userId,
             OrderProducts = orderProducts
         };
 
@@ -240,7 +123,7 @@ public class OrderServiceShould
 
         #region Act(When)
 
-        var exception = await Record.ExceptionAsync(async () => await orderService.CreateAsync(orderDTO));
+        var exception = await Record.ExceptionAsync(async () => await _orderService.CreateAsync(orderDTO));
 
         #endregion Act(When)
 
@@ -284,23 +167,23 @@ public class OrderServiceShould
             order
         };
 
-        orderRepositoryMock
-            .Setup(x => x.GetOrders(null))
+        _orderRepositoryMock
+            .Setup(x => x.GetOrders(null, null))
             .ReturnsAsync(orderList);
 
         #endregion Arrange(Given)
 
         #region Act(When)
 
-        var orders = await orderService.GetOrdersAsync(null);
+        var orders = await _orderService.GetOrdersAsync(null);
 
         #endregion Act(When)
 
         #region Assert(Then)
 
-        orderRepositoryMock
+        _orderRepositoryMock
             .Verify(
-                repository => repository.GetOrders(null),
+                repository => repository.GetOrders(null, null),
                 Times.Once());
 
         Assert.NotNull(orders);
@@ -343,11 +226,11 @@ public class OrderServiceShould
             order
         };
 
-        orderRepositoryMock
-            .Setup(x => x.GetOrders(null))
+        _orderRepositoryMock
+            .Setup(x => x.GetOrders(null, null))
             .ReturnsAsync(orderList);
 
-        orderRepositoryMock
+        _orderRepositoryMock
             .Setup(x => x.GetByIdAsync(orderId))
             .ReturnsAsync(order);
 
@@ -355,7 +238,7 @@ public class OrderServiceShould
 
         #region Act(When)
 
-        var exception = await Record.ExceptionAsync(async () => await orderService.RemoveAsync(orderId));
+        var exception = await Record.ExceptionAsync(async () => await _orderService.RemoveAsync(orderId));
 
         #endregion Act(When)
 
@@ -363,7 +246,7 @@ public class OrderServiceShould
 
         Assert.Null(exception);
 
-        orderRepositoryMock
+        _orderRepositoryMock
             .Verify(
                 repository => repository.Remove(It.Is<Order>(order =>
                     order.OrderProducts.Count() == 1 &&
@@ -405,11 +288,11 @@ public class OrderServiceShould
             order
         };
 
-        orderRepositoryMock
-            .Setup(x => x.GetOrders(null))
+        _orderRepositoryMock
+            .Setup(x => x.GetOrders(null, null))
             .ReturnsAsync(orderList);
 
-        orderRepositoryMock
+        _orderRepositoryMock
             .Setup(x => x.GetByIdAsync(orderId))
             .ReturnsAsync(order);
 
@@ -417,7 +300,7 @@ public class OrderServiceShould
 
         #region Act(When)
 
-        var exception = await Record.ExceptionAsync(async () => await orderService.RemoveAsync(Guid.NewGuid()));
+        var exception = await Record.ExceptionAsync(async () => await _orderService.RemoveAsync(Guid.NewGuid()));
 
         #endregion Act(When)
 
@@ -426,7 +309,7 @@ public class OrderServiceShould
         Assert.NotNull(exception);
         Assert.Equal("Pedido inválido.", exception.Message);
 
-        orderRepositoryMock
+        _orderRepositoryMock
             .Verify(
                 repository => repository.Remove(It.Is<Order>(order =>
                     order.OrderProducts.Count() == 1 &&
@@ -468,11 +351,11 @@ public class OrderServiceShould
             order
         };
 
-        orderRepositoryMock
-            .Setup(x => x.GetOrders(null))
+        _orderRepositoryMock
+            .Setup(x => x.GetOrders(null, null))
             .ReturnsAsync(orderList);
 
-        orderRepositoryMock
+        _orderRepositoryMock
             .Setup(x => x.GetByIdAsync(orderId))
             .ReturnsAsync(order);
 
@@ -480,7 +363,7 @@ public class OrderServiceShould
 
         #region Act(When)
 
-        var exception = await Record.ExceptionAsync(async () => await orderService.UpdateOrderStatusAsync(orderId, OrderStatus.Pronto));
+        var exception = await Record.ExceptionAsync(async () => await _orderService.UpdateOrderStatusAsync(orderId, OrderStatus.Pronto));
 
         #endregion Act(When)
 
@@ -488,7 +371,7 @@ public class OrderServiceShould
 
         Assert.Null(exception);
 
-        orderRepositoryMock
+        _orderRepositoryMock
             .Verify(
                 repository => repository.UpdateAsync(It.Is<Order>(order =>
                     order.OrderProducts.Count() == 1 &&
@@ -530,11 +413,11 @@ public class OrderServiceShould
             order
         };
 
-        orderRepositoryMock
-            .Setup(x => x.GetOrders(null))
+        _orderRepositoryMock
+            .Setup(x => x.GetOrders(null, null))
             .ReturnsAsync(orderList);
 
-        orderRepositoryMock
+        _orderRepositoryMock
             .Setup(x => x.GetByIdAsync(orderId))
             .ReturnsAsync(order);
 
@@ -542,7 +425,7 @@ public class OrderServiceShould
 
         #region Act(When)
 
-        var exception = await Record.ExceptionAsync(async () => await orderService.UpdateOrderStatusAsync(Guid.NewGuid(), OrderStatus.Pronto));
+        var exception = await Record.ExceptionAsync(async () => await _orderService.UpdateOrderStatusAsync(Guid.NewGuid(), OrderStatus.Pronto));
 
         #endregion Act(When)
 
@@ -551,7 +434,7 @@ public class OrderServiceShould
         Assert.NotNull(exception);
         Assert.Equal("Pedido inválido.", exception.Message);
 
-        orderRepositoryMock
+        _orderRepositoryMock
             .Verify(
                 repository => repository.UpdateAsync(It.Is<Order>(order =>
                     order.OrderProducts.Count() == 1 &&
@@ -593,11 +476,11 @@ public class OrderServiceShould
             order
         };
 
-        orderRepositoryMock
-            .Setup(x => x.GetOrders(null))
+        _orderRepositoryMock
+            .Setup(x => x.GetOrders(null, null))
             .ReturnsAsync(orderList);
 
-        orderRepositoryMock
+        _orderRepositoryMock
             .Setup(x => x.GetByIdAsync(orderId))
             .ReturnsAsync(order);
 
@@ -605,7 +488,7 @@ public class OrderServiceShould
 
         #region Act(When)
 
-        var exception = await Record.ExceptionAsync(async () => await orderService.UpdateOrderStatusAsync(orderId, OrderStatus.EmPreparacao));
+        var exception = await Record.ExceptionAsync(async () => await _orderService.UpdateOrderStatusAsync(orderId, OrderStatus.EmPreparacao));
 
         #endregion Act(When)
 
@@ -614,7 +497,7 @@ public class OrderServiceShould
         Assert.NotNull(exception);
         Assert.Equal($"Pedido já possui status {orderStatus.GetDescription()}", exception.Message);
 
-        orderRepositoryMock
+        _orderRepositoryMock
             .Verify(
                 repository => repository.UpdateAsync(It.Is<Order>(order =>
                     order.OrderProducts.Count() == 1 &&

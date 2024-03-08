@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace BurgerRoyale.IOC
 {
-	[ExcludeFromCodeCoverage]
+    [ExcludeFromCodeCoverage]
 	public static class DependencyInjectionConfiguration
 	{
 		public static void Register
@@ -17,7 +17,7 @@ namespace BurgerRoyale.IOC
 			ConfigureDatabase.Register(services, configuration);
 			ConfigureHealthChecks.Register(services);
 			ConfigureServices.Register(services);
-			ConfigureHttpClient.Register(services, configuration);
+			ConfigureSecurity.Register(services, configuration);
 		}
 	}
 }

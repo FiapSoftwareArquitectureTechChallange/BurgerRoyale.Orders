@@ -4,6 +4,7 @@ using BurgerRoyale.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BurgerRoyale.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240305004407_RemoveUserEntity")]
+    partial class RemoveUserEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,10 +40,13 @@ namespace BurgerRoyale.Infrastructure.Migrations
                     b.Property<DateTime>("OrderTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("PaymentRequestId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("UserId")
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
@@ -96,7 +102,7 @@ namespace BurgerRoyale.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("3c61a088-de0b-41f1-b1ad-8b60c4a9a7b8"),
+                            Id = new Guid("8049bb07-1c09-4ce6-aaa4-a8475f46a0e6"),
                             Category = 0,
                             Description = "Hambúrguer de carne bovina.",
                             Name = "Burger Tradicional",
@@ -104,7 +110,7 @@ namespace BurgerRoyale.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("a86a32f1-fec8-42b0-a24b-20e04323131e"),
+                            Id = new Guid("95ca0d02-3783-4b2b-a805-bea43f5a8ec1"),
                             Category = 0,
                             Description = "Hambúrguer de carne bovina com o dobro de bacon.",
                             Name = "Burger Duplo Bacon",
@@ -112,7 +118,7 @@ namespace BurgerRoyale.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("a5fad99b-b768-4a85-9267-0b68bea75ee0"),
+                            Id = new Guid("47850b52-17d0-4f2c-8f3c-413abb1d976b"),
                             Category = 0,
                             Description = "Hambúrguer de carne bovina com o dobro de cheddar.",
                             Name = "Burger Duplo Cheddar",
@@ -120,7 +126,7 @@ namespace BurgerRoyale.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("50923883-cb40-4066-b339-614ec0363614"),
+                            Id = new Guid("f1de9802-a0b0-4b9f-a814-8e8622e67ce7"),
                             Category = 1,
                             Description = "Porção de fritas pequena.",
                             Name = "Fritas Pequena",
@@ -128,7 +134,7 @@ namespace BurgerRoyale.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("39d429d4-0ec7-46a4-b42d-976451956e12"),
+                            Id = new Guid("3cd19be6-8e13-423e-a203-87f7a31c61c5"),
                             Category = 1,
                             Description = "Porção de fritas.",
                             Name = "Fritas",
@@ -136,7 +142,7 @@ namespace BurgerRoyale.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("b367c8ca-d026-45fa-bb71-cf99051f3671"),
+                            Id = new Guid("e82dfd7b-64c6-4121-ad0b-a9027ee0773c"),
                             Category = 1,
                             Description = "Porção de fritas grande.",
                             Name = "Fritas Grande",
@@ -144,7 +150,7 @@ namespace BurgerRoyale.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("ed494baa-563b-4822-8ebf-e600eb82efdc"),
+                            Id = new Guid("9b34391e-296f-4005-bbb1-721374f2516a"),
                             Category = 2,
                             Description = "500 ml com ou sem gás",
                             Name = "Água",
@@ -152,7 +158,7 @@ namespace BurgerRoyale.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("30baa9a0-7c40-4352-b246-bf7497b6702b"),
+                            Id = new Guid("cb3d778f-a648-49c6-8460-a8aa26144219"),
                             Category = 2,
                             Description = "Copo 400 ml",
                             Name = "Refrigerante",
@@ -160,7 +166,7 @@ namespace BurgerRoyale.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("73269e58-bb76-433a-846f-1ac7ea9170d5"),
+                            Id = new Guid("e94c8cb4-e7bf-4a39-b6f8-5ea07090fd03"),
                             Category = 3,
                             Description = "Sundae de diversos sabores",
                             Name = "Sundae",
@@ -168,7 +174,7 @@ namespace BurgerRoyale.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("02a0b895-e092-47ce-94c0-e98286182b6b"),
+                            Id = new Guid("f5271c70-e7bd-4896-9eef-c19132756500"),
                             Category = 3,
                             Description = "Sorvete de diversos sabores",
                             Name = "Sorvete",
