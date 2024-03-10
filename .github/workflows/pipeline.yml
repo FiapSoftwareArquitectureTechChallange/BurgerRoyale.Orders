@@ -20,16 +20,12 @@ jobs:
         dotnet-version: 7.0.x
       
     - name: Restore dependencies
-      run: |
-        cd BurgerRoyale
-        dotnet restore
+      run: dotnet restore
 
     - name: Build
-      run: |
-        cd BurgerRoyale
-        dotnet build --no-restore
+      run: dotnet build --no-restore
 
     - name: Unit Tests
       run: |
-        cd BurgerRoyale/tests/BurgerRoyale.UnitTests
+        cd tests/BurgerRoyale.UnitTests
         dotnet test
