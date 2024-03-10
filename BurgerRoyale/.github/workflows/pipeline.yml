@@ -1,0 +1,35 @@
+name: Pipeline
+
+on:
+  push:
+    branches: [ "main", "develop", "pipeline" ]
+  pull_request:
+    branches: [ "main", "develop", "pipeline" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 7
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 7.0.x
+      
+    - name: Restore dependencies
+      run: |
+        cd BurgerRoyale
+        dotnet restore
+
+    - name: Build
+      run: |
+        cd BurgerRoyale
+        dotnet build --no-restore
+
+    - name: Unit Tests
+      run: |
+        cd BurgerRoyale/tests/BurgerRoyale.UnitTests
+        dotnet test
