@@ -2,9 +2,13 @@ name: Pipeline
 
 on:
   push:
-    branches: [ "main", "develop"]
+    branches: [ "main", "develop", "pipeline"]
   pull_request:
     branches: [ "main", "develop"]
+
+env:
+  ECR_REPOSITORY: burgerroyale
+  LAMBDA_FUNCTION_NAME: burgerroyale-lambda
 
 jobs:
   build:
@@ -29,3 +33,34 @@ jobs:
       run: |
         cd tests/BurgerRoyale.UnitTests
         dotnet test
+        
+  publishImage:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    name: Publish Docker image
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:    
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build Docker Image
+        run: docker build -t $ECR_REPOSITORY .
+
+      - name: Tag Docker Image
+        run: docker tag $ECR_REPOSITORY:latest ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:latest
+
+      - name: Push Docker Image to ECR
+        run: docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:latest
