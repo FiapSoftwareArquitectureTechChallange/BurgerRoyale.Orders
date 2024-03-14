@@ -2,13 +2,9 @@ name: Pipeline
 
 on:
   push:
-    branches: [ "main", "develop", "pipeline"]
+    branches: [ "main", "develop", "pipeline-2"]
   pull_request:
     branches: [ "main", "develop"]
-
-env:
-  ECR_REPOSITORY: burgerroyale
-  LAMBDA_FUNCTION_NAME: burgerroyale-lambda
 
 jobs:
   build:
@@ -33,34 +29,22 @@ jobs:
       run: |
         cd tests/BurgerRoyale.UnitTests
         dotnet test
-        
-  publishImage:
-    # if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    name: Publish Docker image
-    runs-on: ubuntu-latest
-    needs: build
 
-    steps:    
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_RAFFA }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_RAFFA }}
+        aws-region: ${{env.AWS_REGION}}
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_RG }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_RG }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN_RG }}
-          aws-region: ${{ vars.AWS_REGION }}
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-
-      - name: Build Docker Image
-        run: docker build -t $ECR_REPOSITORY .
-
-      - name: Tag Docker Image
-        run: docker tag $ECR_REPOSITORY:latest ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:latest
-
-      - name: Push Docker Image to ECR
-        run: docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:latest
+    - name: Build, tag, and push image to Amazon ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}        
+        IMAGE_TAG: ${{ steps.commit.outputs.short }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f docker/Dockerfile .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
