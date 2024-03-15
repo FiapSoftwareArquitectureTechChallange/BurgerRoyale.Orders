@@ -34,7 +34,7 @@ jobs:
         dotnet test
 
     - name: Test aws region
-      run: echo {{ env.AWS_REGION }}
+      run: echo ${{ env.AWS_REGION }}
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
