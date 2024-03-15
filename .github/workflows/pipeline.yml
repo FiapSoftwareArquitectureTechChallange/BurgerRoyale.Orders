@@ -33,6 +33,9 @@ jobs:
       run: |
         cd tests/BurgerRoyale.UnitTests
         dotnet test
+        
+    - name: Teste ECR_REPOSITORY
+      run: echo ${{ ECR_REPOSITORY }}
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
