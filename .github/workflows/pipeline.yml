@@ -57,7 +57,7 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_IMAGE: burgerroyale
-        IMAGE_URI: ${{ steps.login-ecr.outputs.registry }} / ${{ env.ECR_IMAGE }} :lastest
+        IMAGE_URI: ${{ steps.login-ecr.outputs.registry }}/$ECR_IMAGE:lastest
         #IMAGE_URI: ${{ steps.login-ecr.outputs.registry }}/burgerroyale:lastest
       run: |
         echo ${{ steps }}
