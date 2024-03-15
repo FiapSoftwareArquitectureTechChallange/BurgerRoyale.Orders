@@ -61,7 +61,7 @@ jobs:
       run: |
         # echo "IMAGE_URI={IMAGE_URI}"
         # echo "${{ IMAGE_URI }}"
-        echo "env.IMAGE_UR"
+        echo env.IMAGE_URI
         # echo "${{ env.IMAGE_URI }}"
         cd Kubernetes
         kubectl apply -f mssqlserver-pv.yaml
