@@ -11,7 +11,7 @@ spec:
     spec:
       containers:
         - name: burgerroyale
-          image: douglasfuelber/burger-royale:latest
+          image: ${IMAGE_URI}
           ports:
             - containerPort: 5000
               protocol: TCP
