@@ -53,7 +53,7 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
         IMAGE_URI=$(docker build -t my-image . | tail -n 1)
-        echo "::set-output name=image_uri::$IMAGE_URI"
+        echo "IMAGE_URI={$IMAGE_URI}"
 
     - name: Deploy to EKS
       env:
@@ -64,6 +64,7 @@ jobs:
         echo sed -i.bak "s|$ECR_IMAGE|$ECR_REGISTRY/$ECR_REPOSITORY:latest|g"
 
         #sed -i.bak "s|$ECR_IMAGE|$ECR_REGISTRY/$ECR_REPOSITORY:latest|g"
+        cd Kubernetes
         kubectl apply -f mssqlserver-pv.yaml
         kubectl apply -f mssqlserver-pvc.yaml
 
