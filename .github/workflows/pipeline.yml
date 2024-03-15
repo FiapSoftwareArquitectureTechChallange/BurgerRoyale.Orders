@@ -59,9 +59,10 @@ jobs:
         ECR_IMAGE: burgerroyale
         IMAGE_URI: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY}}
       run: |
+        echo ${{ steps }}
         # echo "IMAGE_URI={IMAGE_URI}"
         # echo "${{ IMAGE_URI }}"
-        echo env.IMAGE_URI
+        # echo env.IMAGE_URI
         # echo "${{ env.IMAGE_URI }}"
         cd Kubernetes
         kubectl apply -f mssqlserver-pv.yaml
