@@ -53,5 +53,3 @@ jobs:
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        # docker build -t 992382425825.dkr.ecr.us-east-1.amazonaws.com/burgerroyale:latest .
-        # docker push 992382425825.dkr.ecr.us-east-1.amazonaws.com/burgerroyale:latest
