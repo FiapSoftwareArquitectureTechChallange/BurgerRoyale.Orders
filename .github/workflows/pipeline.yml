@@ -35,7 +35,7 @@ jobs:
         dotnet test
         
     - name: Teste ECR_REPOSITORY
-      run: echo ${{ ECR_REPOSITORY }}
+      run: echo ${{ env.ECR_REPOSITORY }}
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
