@@ -63,7 +63,7 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
   deployToEKs:
-    name: Publish Docker image
+    name: Deploy to EKS
     runs-on: ubuntu-latest
     needs: publishImage
 
