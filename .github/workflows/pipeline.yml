@@ -56,19 +56,9 @@ jobs:
     - name: Deploy to EKS
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_IMAGE: burgerroyale
-        IMAGE_URI: ${{ steps.login-ecr.outputs.registry }}/$ECR_IMAGE:lastest
-        #IMAGE_URI: ${{ steps.login-ecr.outputs.registry }}/burgerroyale:lastest
+        IMAGE_URI: ${{ steps.login-ecr.outputs.registry }}/burgerroyale:lastest
       run: |
-        echo ${{ steps }}
-       
         cd Kubernetes
-        kubectl apply -f mssqlserver-pv.yaml
-        kubectl apply -f mssqlserver-pvc.yaml
-
-        kubectl apply -f mssqlserver-deployment.yaml
-        kubectl apply -f mssqlserver-svc.yaml
-
         kubectl apply -f api-deployment.yaml
         kubectl apply -f api-svc.yaml
 
