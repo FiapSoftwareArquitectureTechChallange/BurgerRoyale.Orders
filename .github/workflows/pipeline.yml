@@ -87,6 +87,10 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_URI: ${{ steps.login-ecr.outputs.registry }}/burgerroyale:lastest
+        DB_ADDRESS: ${{ secrets.DB_ADDRESS }}
+        DB_USER: ${{ secrets.DB_USER }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        DB_NAME: ${{ secrets.DB_NAME }}
       run: |
         cd Kubernetes
         kubectl apply -f api-deployment.yaml
