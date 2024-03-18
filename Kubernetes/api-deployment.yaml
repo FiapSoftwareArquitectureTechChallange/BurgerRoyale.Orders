@@ -20,6 +20,8 @@ spec:
               value: "Development"
             - name: ASPNETCORE_URLS
               value: http://*:5000
+            - name: ConnectionStrings__DefaultConnection
+              value: Server=${DB_ADDRESS};Database=${DB_NAME};User Id=${DB_USER};TrustServerCertificate=True;Password=${DB_PASSWORD}};
             - name: BurgerRoyale__BaseUrl
               value: "http://burgerroyale:5000"
 

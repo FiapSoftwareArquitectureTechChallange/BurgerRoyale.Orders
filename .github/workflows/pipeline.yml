@@ -83,7 +83,7 @@ jobs:
     - name: Update kube config
       run: aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
 
-    - name: Deploy to EKS
+    - name: Replace variables in Kubernetes manifest
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_URI: ${{ steps.login-ecr.outputs.registry }}/burgerroyale:lastest
@@ -91,7 +91,11 @@ jobs:
         DB_USER: ${{ secrets.DB_USER }}
         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         DB_NAME: ${{ secrets.DB_NAME }}
-        ConnectionStrings__DefaultConnection: Server=${{ secrets.DB_ADDRESS }};Database=${{ secrets.DB_NAME }};User Id=${{ secrets.DB_USER }};TrustServerCertificate=True;Password=${{ secrets.DB_PASSWORD }};
+      run: |
+        cd Kubernetes
+        sed -i 's/\${DB_ADDRESS}/'"${{ secrets.DB_ADDRESS }}"'/g' api-deployment.yml
+
+    - name: Deploy to EKS
       run: |
         cd Kubernetes
         kubectl apply -f api-deployment.yaml
