@@ -91,6 +91,7 @@ jobs:
         DB_USER: ${{ secrets.DB_USER }}
         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         DB_NAME: ${{ secrets.DB_NAME }}
+        ConnectionStrings__DefaultConnection: Server=${{ secrets.DB_ADDRESS }};Database=${{ secrets.DB_NAME }};User Id=${{ secrets.DB_USER }};TrustServerCertificate=True;Password=${{ secrets.DB_PASSWORD }};
       run: |
         cd Kubernetes
         kubectl apply -f api-deployment.yaml
