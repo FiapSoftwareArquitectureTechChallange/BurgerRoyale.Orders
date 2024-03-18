@@ -85,7 +85,7 @@ jobs:
 
     - name: Replace variables in Kubernetes manifest
       env:
-        IMAGE_URI: $ECR_REGISTRY/burgerroyale:lastest
+        IMAGE_URI: ${ECR_REGISTRY}/burgerroyale:lastest
         DB_ADDRESS: ${{ secrets.DB_ADDRESS }}
         DB_NAME: ${{ secrets.DB_NAME }}
         DB_USER: ${{ secrets.DB_USER }}
