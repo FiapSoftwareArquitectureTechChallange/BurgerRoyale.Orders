@@ -93,6 +93,7 @@ jobs:
         DB_NAME: ${{ secrets.DB_NAME }}
       run: |
         cd Kubernetes
+        sed -i 's/\${IMAGE_URI}/'"${{ steps.login-ecr.outputs.registry }}/burgerroyale:lastest"'/g' api-deployment.yaml
         sed -i 's/\${DB_ADDRESS}/'"${{ secrets.DB_ADDRESS }}"'/g' api-deployment.yaml
 
     - name: Deploy to EKS
