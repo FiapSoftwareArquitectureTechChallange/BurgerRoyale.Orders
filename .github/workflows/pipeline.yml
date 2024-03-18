@@ -100,8 +100,8 @@ jobs:
         # sed -i 's|${NOME_DO_APP}|'"$NOME_DO_APP"'|g' deployment.yml
         # sed -i 's|${NOME_DO_AMBIENTE}|'"$NOME_DO_AMBIENTE"'|g' deployment.yml
 
-        sed -i 's/\${DB_ADDRESS}/'"addressofDB"'/g' api-deployment.yaml
-        sed -i 's|${IMAGE_URI}|'"TESTANDO"'|g' api-deployment.yaml
+        sed -i 's|${IMAGE_URI}|'"$IMAGE_URI"'|g' api-deployment.yaml
+        sed -i 's|${DB_ADDRESS}|'"$DB_ADDRESS"'|g' api-deployment.yaml
 
     - name: Deploy to EKS
       run: |
