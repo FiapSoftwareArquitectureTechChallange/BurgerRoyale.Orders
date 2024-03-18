@@ -85,23 +85,27 @@ jobs:
 
     - name: Replace variables in Kubernetes manifest
       env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        IMAGE_URI: ${{ steps.login-ecr.outputs.registry }}/burgerroyale:lastest
+        IMAGE_URI: $ECR_REGISTRY/burgerroyale:lastest
         DB_ADDRESS: ${{ secrets.DB_ADDRESS }}
+        DB_NAME: ${{ secrets.DB_NAME }}
         DB_USER: ${{ secrets.DB_USER }}
         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        DB_NAME: ${{ secrets.DB_NAME }}
+        JWT_ISSUER: ${{ secrets.JWT_ISSUER }}
+        JWT_AUDIENCE: ${{ secrets.JWT_AUDIENCE }}
+        JWT_SECRETKEY: ${{ secrets.JWT_SECRET_KEY }}
       run: |
         cd Kubernetes
-        # sed -i 's/\${NOME_DO_APP}/'"$NOME_DO_APP"'/g' deployment.yml
-        # sed -i 's/\${NOME_DO_AMBIENTE}/'"$NOME_DO_AMBIENTE"'/g' deployment.yml
-
-        # sed -i 's|${NOME_DO_APP}|'"$NOME_DO_APP"'|g' deployment.yml
-        # sed -i 's|${NOME_DO_APP}|'"$NOME_DO_APP"'|g' deployment.yml
-        # sed -i 's|${NOME_DO_AMBIENTE}|'"$NOME_DO_AMBIENTE"'|g' deployment.yml
-
         sed -i 's|${IMAGE_URI}|'"$IMAGE_URI"'|g' api-deployment.yaml
+        
         sed -i 's|${DB_ADDRESS}|'"$DB_ADDRESS"'|g' api-deployment.yaml
+        sed -i 's|${DB_NAME}|'"$DB_NAME"'|g' api-deployment.yaml
+        sed -i 's|${DB_USER}|'"$DB_USER"'|g' api-deployment.yaml
+        sed -i 's|${DB_PASSWORD}|'"$DB_PASSWORD"'|g' api-deployment.yaml
+
+
+        sed -i 's|${JWT_ISSUER}|'"$JWT_ISSUER"'|g' api-deployment.yaml
+        sed -i 's|${JWT_AUDIENCE}|'"$JWT_AUDIENCE"'|g' api-deployment.yaml
+        sed -i 's|${JWT_SECRETKEY}|'"$JWT_SECRETKEY"'|g' api-deployment.yaml
 
     - name: Deploy to EKS
       run: |
