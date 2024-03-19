@@ -11,7 +11,7 @@ spec:
     spec:
       containers:
         - name: burgerroyale
-          image: douglasfuelber/burger-royale:latest
+          image: ${IMAGE_URI}
           ports:
             - containerPort: 5000
               protocol: TCP
@@ -21,11 +21,15 @@ spec:
             - name: ASPNETCORE_URLS
               value: http://*:5000
             - name: ConnectionStrings__DefaultConnection
-              value: Server=mssqlserver-service;Database=BurgerRoyaleDb;User Id=SA;TrustServerCertificate=True;Password='65876Df&';
-            - name: PaymentService__BaseUrl
-              value: "http://fakepayment:5001"
-            - name: BurgerRoyale__BaseUrl
-              value: "http://burgerroyale:5000"
+              value: Server=${DB_ADDRESS};Database=${DB_NAME};User Id=${DB_USER};TrustServerCertificate=True;Password=${DB_PASSWORD};
+            # - name: BurgerRoyale__BaseUrl
+            #   value: "http://burgerroyale:5000"
+            - name: Jwt__Issuer
+              value: ${JWT_ISSUER}
+            - name: Jwt__Audience
+              value: ${JWT_AUDIENCE}
+            - name: Jwt__SecretKey
+              value: ${JWT_SECRETKEY}
 
           resources:
             requests:
