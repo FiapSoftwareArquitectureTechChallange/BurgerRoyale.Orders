@@ -1,0 +1,121 @@
+name: Pipeline
+
+on:
+  push:
+    branches: [ "main"]
+  pull_request:
+    branches: [ "main", "develop"]
+  
+env:
+  EKS_CLUSTER_NAME: burger-cluster-eks
+  ECR_REPOSITORY: burgerroyale-ecr
+  AWS_REGION: us-east-1
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 7
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 7.0.x
+      
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --no-restore
+
+    - name: Unit Tests
+      run: |
+        cd tests/BurgerRoyale.UnitTests
+        dotnet test
+        
+  publishImage:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    name: Publish Docker image
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build, tag, and push image to Amazon ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+  deployToEKs:
+    name: Deploy to EKS
+    runs-on: ubuntu-latest
+    needs: publishImage
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Update kube config
+      run: aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
+
+    - name: Replace variables in Kubernetes manifest
+      env:
+        IMAGE_URI: ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:lastest
+        
+        DB_ADDRESS: ${{ secrets.DB_ADDRESS }}
+        DB_NAME: ${{ secrets.DB_NAME }}
+        DB_USER: ${{ secrets.DB_USER }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+
+        JWT_ISSUER: ${{ secrets.JWT_ISSUER }}
+        JWT_AUDIENCE: ${{ secrets.JWT_AUDIENCE }}
+        JWT_SECRETKEY: ${{ secrets.JWT_SECRET_KEY }}
+      run: |
+        cd Kubernetes
+        sed -i 's|${IMAGE_URI}|'"$IMAGE_URI"'|g' api-deployment.yaml
+        
+        sed -i 's|${DB_ADDRESS}|'"$DB_ADDRESS"'|g' api-deployment.yaml
+        sed -i 's|${DB_NAME}|'"$DB_NAME"'|g' api-deployment.yaml
+        sed -i 's|${DB_USER}|'"$DB_USER"'|g' api-deployment.yaml
+        sed -i 's|${DB_PASSWORD}|'"$DB_PASSWORD"'|g' api-deployment.yaml
+
+        sed -i 's|${JWT_ISSUER}|'"$JWT_ISSUER"'|g' api-deployment.yaml
+        sed -i 's|${JWT_AUDIENCE}|'"$JWT_AUDIENCE"'|g' api-deployment.yaml
+        sed -i 's|${JWT_SECRETKEY}|'"$JWT_SECRETKEY"'|g' api-deployment.yaml
+
+    - name: Deploy to EKS
+      run: |
+        cd Kubernetes
+        kubectl apply -f api-deployment.yaml
+        kubectl apply -f api-svc.yaml
+        
+        kubectl apply -f metricserver-deployment.yaml
+        kubectl apply -f api-scaleobject.yaml
