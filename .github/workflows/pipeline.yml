@@ -7,7 +7,8 @@ on:
     branches: [ "main", "develop"]
   
 env:
-  EKS_CLUSTER_NAME: burgerroyale-k8s
+  EKS_CLUSTER_NAME: burger-cluster-eks
+  ECR_REPOSITORY: burgerroyale-ecr
   AWS_REGION: us-east-1
 
 jobs:
@@ -49,7 +50,6 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
         aws-region: ${{ env.AWS_REGION }}
 
     - name: Login to Amazon ECR
@@ -59,7 +59,6 @@ jobs:
     - name: Build, tag, and push image to Amazon ECR
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: burgerroyale
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
@@ -78,7 +77,6 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
         aws-region: ${{ env.AWS_REGION }}
 
     - name: Login to Amazon ECR
@@ -90,7 +88,7 @@ jobs:
 
     - name: Replace variables in Kubernetes manifest
       env:
-        IMAGE_URI: ${{ steps.login-ecr.outputs.registry }}/burgerroyale:lastest
+        IMAGE_URI: ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:lastest
         
         DB_ADDRESS: ${{ secrets.DB_ADDRESS }}
         DB_NAME: ${{ secrets.DB_NAME }}
