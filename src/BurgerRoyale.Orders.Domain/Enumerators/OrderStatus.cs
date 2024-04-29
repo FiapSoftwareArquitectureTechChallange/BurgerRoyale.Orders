@@ -4,8 +4,8 @@ namespace BurgerRoyale.Orders.Domain.Enumerators;
 
 public enum OrderStatus
 {
-    [Description("Recebido")]
-    Recebido,
+    [Description("Pagamento pendente")]
+    PagamentoPendente,
 
     [Description("Pagamento aprovado")]
     PagamentoAprovado,

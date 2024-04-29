@@ -59,7 +59,7 @@ public class OrderShould
 
         try
         {
-            order.SetStatus(OrderStatus.Recebido);
+            order.SetStatus(OrderStatus.PagamentoPendente);
         } catch (Exception ex)
         {
             threwException = ex;

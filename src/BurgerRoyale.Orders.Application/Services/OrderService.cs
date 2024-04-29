@@ -1,12 +1,15 @@
-﻿using BurgerRoyale.Orders.Domain.Constants;
+﻿using BurgerRoyale.Orders.Domain.Configuration;
+using BurgerRoyale.Orders.Domain.Constants;
 using BurgerRoyale.Orders.Domain.DTO;
 using BurgerRoyale.Orders.Domain.Entities;
 using BurgerRoyale.Orders.Domain.Enumerators;
 using BurgerRoyale.Orders.Domain.Exceptions;
 using BurgerRoyale.Orders.Domain.Helpers;
+using BurgerRoyale.Orders.Domain.Interface.IntegrationServices;
 using BurgerRoyale.Orders.Domain.Interface.Repositories;
 using BurgerRoyale.Orders.Domain.Interface.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 using System.Security.Claims;
 
 namespace BurgerRoyale.Orders.Application.Services;
@@ -16,16 +19,22 @@ public class OrderService : IOrderService
     private readonly IOrderRepository _orderRepository;
     private readonly IProductRepository _productRepository;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IMessageService _messageService;
+    private readonly MessageQueuesConfiguration _messageQueuesConfiguration;
 
     public OrderService(
         IOrderRepository orderRepository,
         IProductRepository productRepository,
-        IHttpContextAccessor httpContextAccessor
+        IHttpContextAccessor httpContextAccessor,
+        IMessageService messageService,
+        IOptions<MessageQueuesConfiguration> messageQueuesConfiguration
     )
     {
         _orderRepository = orderRepository;
         _productRepository = productRepository;
         _httpContextAccessor = httpContextAccessor;
+        _messageService = messageService;
+        _messageQueuesConfiguration = messageQueuesConfiguration.Value;
     }
 
     public async Task<OrderDTO> CreateAsync(CreateOrderDTO orderDTO)
@@ -38,7 +47,19 @@ public class OrderService : IOrderService
 
         await _orderRepository.AddAsync(order);
 
+        await RequestOrderPayment(order);
+
         return new OrderDTO(order);
+    }
+
+    private async Task RequestOrderPayment(Order order)
+    {
+        var message = new RequestPaymentDto(order.Id, order.TotalPrice, order.UserId);
+
+        await _messageService.SendMessageAsync(
+            _messageQueuesConfiguration.OrderPaymentRequestQueue,
+            message
+        );
     }
 
     private Order CreateOrder(CreateOrderDTO orderDTO)

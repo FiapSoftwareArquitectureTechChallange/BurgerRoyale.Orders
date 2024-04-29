@@ -54,6 +54,7 @@ namespace BurgerRoyale.Orders.API.Middleware
 		{
 			var e when e is DomainException => HttpStatusCode.BadRequest,
 			var e when e is NotFoundException => HttpStatusCode.NotFound,
+			var e when e is IntegrationException => HttpStatusCode.FailedDependency,
 			_ => HttpStatusCode.InternalServerError
 		};
 	}

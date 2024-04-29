@@ -24,7 +24,7 @@ public class Order : Entity
     {
         UserId = userId;
         OrderTime = DateTime.Now;
-        Status = OrderStatus.Recebido;
+        Status = OrderStatus.PagamentoPendente;
     }
 
     public void AddProduct(OrderProduct orderProduct)
@@ -39,7 +39,7 @@ public class Order : Entity
 
     public void SetStatus(OrderStatus newStatus)
     {
-        if (Status.Equals(OrderStatus.PagamentoAprovado) && newStatus.Equals(OrderStatus.Recebido))
+        if (Status.Equals(OrderStatus.PagamentoAprovado) && newStatus.Equals(OrderStatus.PagamentoPendente))
         {
             throw new DomainException("O pagamento já foi aprovado.");
         }

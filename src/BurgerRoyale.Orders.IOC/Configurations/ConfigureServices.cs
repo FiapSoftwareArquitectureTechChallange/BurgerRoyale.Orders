@@ -1,6 +1,8 @@
 ﻿using BurgerRoyale.Orders.Application.Services;
+using BurgerRoyale.Orders.Domain.Interface.IntegrationServices;
 using BurgerRoyale.Orders.Domain.Interface.Repositories;
 using BurgerRoyale.Orders.Domain.Interface.Services;
+using BurgerRoyale.Orders.Infrastructure.IntegrationServices;
 using BurgerRoyale.Orders.Infrastructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics.CodeAnalysis;
@@ -20,11 +22,13 @@ namespace BurgerRoyale.Orders.IOC.Configurations
 			services.AddScoped<IProductService, ProductService>();
 			services.AddScoped<IOrderService, OrderService>();
 
-			#endregion Services
+            services.AddScoped<IMessageService, AWSSQSService>();
 
-			#region Repositories
+            #endregion Services
 
-			services.AddScoped<IProductRepository, ProductRepository>();
+            #region Repositories
+
+            services.AddScoped<IProductRepository, ProductRepository>();
 			services.AddScoped<IProductImageRepository, ProductImageRepository>();
 			services.AddScoped<IOrderRepository, OrderRepository>();
 
