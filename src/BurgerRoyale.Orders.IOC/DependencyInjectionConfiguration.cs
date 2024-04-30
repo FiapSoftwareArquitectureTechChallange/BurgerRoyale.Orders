@@ -17,8 +17,10 @@ namespace BurgerRoyale.Orders.IOC
 			ConfigureDatabase.Register(services, configuration);
 			ConfigureHealthChecks.Register(services);
 			ConfigureOptions.Register(services, configuration);
-			ConfigureServices.Register(services);
 			ConfigureSecurity.Register(services, configuration);
-		}
+
+			ConfigureServices.Register(services);
+            ConfigureHostedServices.Register(services);
+        }
 	}
 }

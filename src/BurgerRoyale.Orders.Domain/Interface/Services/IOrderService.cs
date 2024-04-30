@@ -16,5 +16,7 @@ namespace BurgerRoyale.Orders.Domain.Interface.Services
 		Task RemoveAsync(Guid id);
 
 		Task<int> GenerateOrderNumber();
+
+		Task UpdatePaymentStatusAsync(Guid id, bool paymentSuccesfullyProcessed);
 	}
 }

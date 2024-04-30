@@ -7,8 +7,8 @@ public enum OrderStatus
     [Description("Pagamento pendente")]
     PagamentoPendente,
 
-    [Description("Pagamento aprovado")]
-    PagamentoAprovado,
+    [Description("Pagamento reprovado")]
+    PagamentoReprovado,
 
     [Description("Em preparação")]
     EmPreparacao,

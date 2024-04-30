@@ -39,11 +39,6 @@ public class Order : Entity
 
     public void SetStatus(OrderStatus newStatus)
     {
-        if (Status.Equals(OrderStatus.PagamentoAprovado) && newStatus.Equals(OrderStatus.PagamentoPendente))
-        {
-            throw new DomainException("O pagamento já foi aprovado.");
-        }
-
         Status = newStatus;
 
         if (newStatus == OrderStatus.Finalizado)

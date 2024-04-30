@@ -34,7 +34,7 @@ public class AWSSQSService : IMessageService
         catch (Exception exception)
         {
             throw new IntegrationException(
-                "Error sending message to AWS SQS Queue",
+                $"Error sending messages to AWS SQS Queue ({queueName})",
                 exception
             );
         }
@@ -45,6 +45,40 @@ public class AWSSQSService : IMessageService
         string message = JsonSerializer.Serialize(messageBody);
 
         return await SendMessageAsync(queueName, message);
+    }
+
+    public async Task<IEnumerable<TResponse>> ReadMessagesAsync<TResponse>(string queueName, int? maxNumberOfMessages)
+    {
+        try
+        {
+            string queueUrl = await GetQueueUrl(queueName);
+
+            var request = new ReceiveMessageRequest
+            {
+                QueueUrl = queueUrl,
+                MaxNumberOfMessages = maxNumberOfMessages ?? 10
+            };
+
+            var response = await _amazonSQSClient.ReceiveMessageAsync(request);
+
+            List<TResponse> messages = new();
+
+            foreach (var message in response.Messages)
+            {
+                messages.Add(JsonSerializer.Deserialize<TResponse>(message.Body)!);
+
+                await _amazonSQSClient.DeleteMessageAsync(queueUrl, message.ReceiptHandle);
+            }
+
+            return messages;
+        }
+        catch (Exception exception)
+        {
+            throw new IntegrationException(
+                $"Error reading messages from AWS SQS Queue ({queueName})",
+                exception
+            );
+        }
     }
 
     private IAmazonSQS CreateClient()
@@ -86,5 +120,5 @@ public class AWSSQSService : IMessageService
         );
 
         return response.QueueUrl;
-    }
+    }    
 }

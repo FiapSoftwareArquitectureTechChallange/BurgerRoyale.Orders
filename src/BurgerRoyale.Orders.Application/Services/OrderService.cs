@@ -173,4 +173,36 @@ public class OrderService : IOrderService
     {
         return _httpContextAccessor.HttpContext?.User?.IsInRole(RolesConstants.Customer) ?? false;
     }
+
+    public async Task UpdatePaymentStatusAsync(Guid id, bool paymentSuccesfullyProcessed)
+    {
+        await UpdateOrderStatusAsync(
+            id,
+            paymentSuccesfullyProcessed
+                ? OrderStatus.EmPreparacao
+                : OrderStatus.PagamentoReprovado
+        );
+
+        if (paymentSuccesfullyProcessed)
+        {
+            var order = await _orderRepository.GetByIdAsync(id);
+            order = await _orderRepository.GetOrder(order.Id, order.UserId);
+
+            await RequestOrderPreparation(new OrderDTO(order));
+        }        
+    }
+
+    private async Task RequestOrderPreparation(OrderDTO orderDto)
+    {
+        var message = new RequestOrderPreparationDto(
+            orderDto.OrderId,
+            orderDto.OrderProducts,
+            orderDto.UserId
+        );
+
+        await _messageService.SendMessageAsync(
+            _messageQueuesConfiguration.OrderPaymentRequestQueue,
+            message
+        );
+    }
 }
