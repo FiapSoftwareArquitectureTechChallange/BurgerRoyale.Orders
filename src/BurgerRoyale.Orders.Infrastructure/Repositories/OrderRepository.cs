@@ -4,6 +4,7 @@ using BurgerRoyale.Orders.Domain.Interface.Repositories;
 using BurgerRoyale.Orders.Infrastructure.Context;
 using BurgerRoyale.Orders.Infrastructure.RepositoriesStandard;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace BurgerRoyale.Orders.Infrastructure.Repositories
 {
@@ -15,13 +16,24 @@ namespace BurgerRoyale.Orders.Infrastructure.Repositories
 
 		public async Task<Order?> GetOrder(Guid id, Guid? userId)
 		{
-			return await _context.Orders
-				.Include(x => x.OrderProducts)
-				.ThenInclude(x => x.Product)
-				.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+			return await GetOrderQuery()
+                .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
 		}
 
-		public async Task<IEnumerable<Order>> GetOrders(OrderStatus? orderStatus, Guid? userId)
+        public async Task<Order?> GetOrder(Guid id)
+        {
+            return await GetOrderQuery()
+				.FirstOrDefaultAsync(x => x.Id == id);
+        }
+
+        private IIncludableQueryable<Order, Product> GetOrderQuery()
+        {
+            return _context.Orders
+                .Include(x => x.OrderProducts)
+                .ThenInclude(x => x.Product);
+        }
+
+        public async Task<IEnumerable<Order>> GetOrders(OrderStatus? orderStatus, Guid? userId)
 		{
 			var query = _context.Orders.AsQueryable();
 

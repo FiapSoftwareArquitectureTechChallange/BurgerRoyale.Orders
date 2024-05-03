@@ -31,8 +31,6 @@ public abstract class SQSBackgroundService<TMessage> : BackgroundService, IHoste
 
             if (messages.Any())
             {
-                Console.WriteLine($"{messages.Count()} messages received");
-
                 foreach (var msg in messages)
                 {
                     await ProcessMessage(msg);

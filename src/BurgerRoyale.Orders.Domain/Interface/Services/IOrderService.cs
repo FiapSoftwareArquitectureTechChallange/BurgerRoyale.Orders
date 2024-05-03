@@ -7,7 +7,7 @@ namespace BurgerRoyale.Orders.Domain.Interface.Services
 	{
 		Task<OrderDTO> CreateAsync(CreateOrderDTO orderDTO);
 
-		Task<OrderDTO> GetOrderAsync(Guid id);
+		Task<OrderDTO> GetUserOrderAsync(Guid id);
 
 		Task<IEnumerable<OrderDTO>> GetOrdersAsync(OrderStatus? orderStatus);
 

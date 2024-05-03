@@ -56,7 +56,7 @@ public class OrderController : BaseController
     [ProducesDefaultResponseType]
     public async Task<IActionResult> GetOrder(Guid id)
     {
-        var order = await _orderService.GetOrderAsync(id);
+        var order = await _orderService.GetUserOrderAsync(id);
 
         return IStatusCode(
             new ReturnAPI<OrderDTO>(order)

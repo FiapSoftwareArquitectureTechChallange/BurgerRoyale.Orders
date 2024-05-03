@@ -9,6 +9,7 @@ using BurgerRoyale.Orders.Domain.Interface.IntegrationServices;
 using BurgerRoyale.Orders.Domain.Interface.Repositories;
 using BurgerRoyale.Orders.Domain.Interface.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
 
@@ -21,13 +22,15 @@ public class OrderService : IOrderService
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IMessageService _messageService;
     private readonly MessageQueuesConfiguration _messageQueuesConfiguration;
+    private readonly ILogger<OrderService> _logger;
 
     public OrderService(
         IOrderRepository orderRepository,
         IProductRepository productRepository,
         IHttpContextAccessor httpContextAccessor,
         IMessageService messageService,
-        IOptions<MessageQueuesConfiguration> messageQueuesConfiguration
+        IOptions<MessageQueuesConfiguration> messageQueuesConfiguration,
+        ILogger<OrderService> logger
     )
     {
         _orderRepository = orderRepository;
@@ -35,11 +38,23 @@ public class OrderService : IOrderService
         _httpContextAccessor = httpContextAccessor;
         _messageService = messageService;
         _messageQueuesConfiguration = messageQueuesConfiguration.Value;
+        _logger = logger;
     }
 
     public async Task<OrderDTO> CreateAsync(CreateOrderDTO orderDTO)
     {
-        Order order = CreateOrder(orderDTO);
+        Order order = await CreateOrder(orderDTO);        
+
+        await RequestOrderPayment(order);
+
+        return new OrderDTO(order);
+    }    
+
+    private async Task<Order> CreateOrder(CreateOrderDTO orderDTO)
+    {
+        var userId = GetLoggedUserId();
+
+        var order = new Order(userId);
 
         await AddOrderProductsToOrder(orderDTO, order);
 
@@ -47,26 +62,12 @@ public class OrderService : IOrderService
 
         await _orderRepository.AddAsync(order);
 
-        await RequestOrderPayment(order);
-
-        return new OrderDTO(order);
-    }
-
-    private async Task RequestOrderPayment(Order order)
-    {
-        var message = new RequestPaymentDto(order.Id, order.TotalPrice, order.UserId);
-
-        await _messageService.SendMessageAsync(
-            _messageQueuesConfiguration.OrderPaymentRequestQueue,
-            message
+        _logger.LogInformation(
+            "Order {OrderId} created",
+            order.Id
         );
-    }
 
-    private Order CreateOrder(CreateOrderDTO orderDTO)
-    {
-        var userId = GetLoggedUserId();
-
-        return new Order(userId);
+        return order;
     }
 
     private async Task AddOrderProductsToOrder(CreateOrderDTO orderDTO, Order order)
@@ -85,7 +86,7 @@ public class OrderService : IOrderService
     private static void ValidateIfProductDoesNotExist(Product? product)
     {
         if (product is null)
-            throw new NotFoundException("Produto(s) inválido(s).");
+            throw new NotFoundException("Invalid(s) product(s).");
     }
 
     public async Task<int> GenerateOrderNumber()
@@ -99,6 +100,21 @@ public class OrderService : IOrderService
         return 1;
     }
 
+    private async Task RequestOrderPayment(Order order)
+    {
+        var message = new RequestPaymentDto(order.Id, order.TotalPrice, order.UserId);
+
+        await _messageService.SendMessageAsync(
+            _messageQueuesConfiguration.OrderPaymentRequestQueue,
+            message
+        );
+
+        _logger.LogInformation(
+            "Order {OrderId} payment request sent",
+            order.Id
+        );
+    }
+
     public async Task<IEnumerable<OrderDTO>> GetOrdersAsync(OrderStatus? orderStatus)
     {
         var userId = IsCustomer() ? GetLoggedUserId() : null;
@@ -110,31 +126,33 @@ public class OrderService : IOrderService
         return orderDTOs;
     }
 
-    public async Task<OrderDTO> GetOrderAsync(Guid id)
+    public async Task<OrderDTO> GetUserOrderAsync(Guid id)
     {
         var userId = IsCustomer() ? GetLoggedUserId() : null;
 
         var order = await _orderRepository.GetOrder(id, userId);
 
-        ValidateIfOrderDoesNotExist(order);
+        if (order is null)
+            throw new NotFoundException("Order doesn't exist.");
 
         return new OrderDTO(order!);
     }
 
     public async Task RemoveAsync(Guid id)
     {
-        var order = await _orderRepository.GetByIdAsync(id);
-
-        ValidateIfOrderDoesNotExist(order);
+        Order order = await GetOrderById(id);
 
         _orderRepository.Remove(order!);
+
+        _logger.LogInformation(
+            "Order {OrderId} removed",
+            order.Id
+        );
     }
 
     public async Task UpdateOrderStatusAsync(Guid id, OrderStatus orderStatus)
     {
-        var order = await _orderRepository.GetByIdAsync(id);
-
-        ValidateIfOrderDoesNotExist(order);
+        var order = await GetOrderById(id);
 
         ValidateIfStatusIsTheSame(orderStatus, order);
 
@@ -143,16 +161,20 @@ public class OrderService : IOrderService
         await _orderRepository.UpdateAsync(order);
     }
 
-    private static void ValidateIfOrderDoesNotExist(Order? order)
+    private async Task<Order> GetOrderById(Guid id)
     {
+        var order = await _orderRepository.GetOrder(id);
+
         if (order is null)
-            throw new DomainException("Pedido inválido.");
+            throw new NotFoundException("Order doesn't exist.");
+
+        return order;
     }
 
     private static void ValidateIfStatusIsTheSame(OrderStatus orderStatus, Order order)
     {
         if (order.Status == orderStatus)
-            throw new DomainException($"Pedido já possui status {orderStatus.GetDescription()}");
+            throw new DomainException($"Order already has {orderStatus.GetDescription()} status");
     }
 
     private Guid? GetLoggedUserId()
@@ -176,20 +198,28 @@ public class OrderService : IOrderService
 
     public async Task UpdatePaymentStatusAsync(Guid id, bool paymentSuccesfullyProcessed)
     {
+        var order = await GetOrderById(id);
+
+        if (order.Status != OrderStatus.PagamentoPendente)
+            throw new DomainException($"Order doesn't have pending payment");
+
+        var newStatus = paymentSuccesfullyProcessed
+                ? OrderStatus.EmPreparacao
+                : OrderStatus.PagamentoReprovado;
+
         await UpdateOrderStatusAsync(
             id,
-            paymentSuccesfullyProcessed
-                ? OrderStatus.EmPreparacao
-                : OrderStatus.PagamentoReprovado
+            newStatus
+        );
+
+        _logger.LogInformation(
+            "Order {OrderId} updated to \"{OrderStatus}\" status",
+            id,
+            newStatus.GetDescription()
         );
 
         if (paymentSuccesfullyProcessed)
-        {
-            var order = await _orderRepository.GetByIdAsync(id);
-            order = await _orderRepository.GetOrder(order.Id, order.UserId);
-
             await RequestOrderPreparation(new OrderDTO(order));
-        }        
     }
 
     private async Task RequestOrderPreparation(OrderDTO orderDto)
@@ -201,8 +231,13 @@ public class OrderService : IOrderService
         );
 
         await _messageService.SendMessageAsync(
-            _messageQueuesConfiguration.OrderPaymentRequestQueue,
+            _messageQueuesConfiguration.OrderPreparationRequestQueue,
             message
+        );
+
+        _logger.LogInformation(
+            "Order {OrderId} preparation requested",
+            orderDto.OrderId
         );
     }
 }

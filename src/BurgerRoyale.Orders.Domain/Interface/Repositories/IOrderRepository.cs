@@ -9,5 +9,7 @@ namespace BurgerRoyale.Orders.Domain.Interface.Repositories
 		Task<IEnumerable<Order>> GetOrders(OrderStatus? orderStatus, Guid? userId);
 
 		Task<Order?> GetOrder(Guid id, Guid? userId);
-	}
+
+        Task<Order?> GetOrder(Guid id);
+    }
 }
