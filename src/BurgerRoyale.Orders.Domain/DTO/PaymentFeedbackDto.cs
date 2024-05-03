@@ -1,8 +1,7 @@
 ﻿namespace BurgerRoyale.Orders.Domain.DTO;
 
-public record RequestPaymentDto
+public record PaymentFeedbackDto
 (
 	Guid OrderId,
-	decimal Amount,
-	Guid? UserId
+	bool ProcessedSuccessfully
 );

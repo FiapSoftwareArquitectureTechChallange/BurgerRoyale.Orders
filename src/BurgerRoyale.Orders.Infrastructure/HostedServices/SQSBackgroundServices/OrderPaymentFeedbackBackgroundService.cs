@@ -7,22 +7,22 @@ using Microsoft.Extensions.Options;
 
 namespace BurgerRoyale.Orders.Infrastructure.HostedServices.SQSBackgroundServices;
 
-public class OrderPaymentResponseBackgroundService : SQSBackgroundService<RequestPaymentResponseDto>
+public class OrderPaymentFeedbackBackgroundService : SQSBackgroundService<PaymentFeedbackDto>
 {
     private readonly IOrderService _orderService;
-    private readonly ILogger<OrderPaymentResponseBackgroundService> _logger;
+    private readonly ILogger<OrderPaymentFeedbackBackgroundService> _logger;
 
-    public OrderPaymentResponseBackgroundService
+    public OrderPaymentFeedbackBackgroundService
     (
         IServiceScopeFactory serviceScopeFactory,
         IOptions<MessageQueuesConfiguration> queuesConfiguration
-    ) : base(serviceScopeFactory, queuesConfiguration.Value.OrderPaymentResponseQueue)
+    ) : base(serviceScopeFactory, queuesConfiguration.Value.OrderPaymentFeedbackQueue)
     {
         _orderService = _serviceProvider.GetRequiredService<IOrderService>();
-        _logger = _serviceProvider.GetRequiredService<ILogger<OrderPaymentResponseBackgroundService>>();
+        _logger = _serviceProvider.GetRequiredService<ILogger<OrderPaymentFeedbackBackgroundService>>();
     }
 
-    protected override async Task ProcessMessage(RequestPaymentResponseDto message)
+    protected override async Task ProcessMessage(PaymentFeedbackDto message)
     {
         try
         {
@@ -35,7 +35,7 @@ public class OrderPaymentResponseBackgroundService : SQSBackgroundService<Reques
         {
             _logger.LogError(
                 exception,
-                "Error processing order {OrderId} payment response",
+                "Error processing order {OrderId} payment feedback",
                 message.OrderId
             );
         }

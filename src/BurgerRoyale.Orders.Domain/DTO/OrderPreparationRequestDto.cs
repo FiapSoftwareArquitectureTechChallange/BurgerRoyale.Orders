@@ -1,6 +1,6 @@
 ﻿namespace BurgerRoyale.Orders.Domain.DTO;
 
-public record RequestOrderPreparationDto
+public record OrderPreparationRequestDto
 (
 	Guid OrderId,
     IEnumerable<OrderProductDTO> OrderProducts,

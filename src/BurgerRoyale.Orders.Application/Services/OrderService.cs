@@ -102,7 +102,7 @@ public class OrderService : IOrderService
 
     private async Task RequestOrderPayment(Order order)
     {
-        var message = new RequestPaymentDto(order.Id, order.TotalPrice, order.UserId);
+        var message = new PaymentRequestDto(order.Id, order.TotalPrice, order.UserId);
 
         await _messageService.SendMessageAsync(
             _messageQueuesConfiguration.OrderPaymentRequestQueue,
@@ -156,9 +156,15 @@ public class OrderService : IOrderService
 
         ValidateIfStatusIsTheSame(orderStatus, order);
 
-        order!.SetStatus(orderStatus);
+        order.SetStatus(orderStatus);
 
         await _orderRepository.UpdateAsync(order);
+
+        _logger.LogInformation(
+            "Order {OrderId} updated to \"{OrderStatus}\" status",
+            id,
+            orderStatus.GetDescription()
+        );
     }
 
     private async Task<Order> GetOrderById(Guid id)
@@ -212,19 +218,13 @@ public class OrderService : IOrderService
             newStatus
         );
 
-        _logger.LogInformation(
-            "Order {OrderId} updated to \"{OrderStatus}\" status",
-            id,
-            newStatus.GetDescription()
-        );
-
         if (paymentSuccesfullyProcessed)
             await RequestOrderPreparation(new OrderDTO(order));
     }
 
     private async Task RequestOrderPreparation(OrderDTO orderDto)
     {
-        var message = new RequestOrderPreparationDto(
+        var message = new OrderPreparationRequestDto(
             orderDto.OrderId,
             orderDto.OrderProducts,
             orderDto.UserId

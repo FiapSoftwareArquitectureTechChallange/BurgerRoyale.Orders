@@ -12,7 +12,8 @@ namespace BurgerRoyale.Orders.IOC.Configurations
 			IServiceCollection services
 		)
 		{
-            services.AddHostedService<OrderPaymentResponseBackgroundService>();
+            services.AddHostedService<OrderPaymentFeedbackBackgroundService>();
+            services.AddHostedService<OrderPreparedBackgroundService>();
         }
 	}
 }

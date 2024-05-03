@@ -1,5 +1,4 @@
 ﻿using BurgerRoyale.Orders.Domain.Enumerators;
-using BurgerRoyale.Orders.Domain.Exceptions;
 
 namespace BurgerRoyale.Orders.Domain.Entities;
 
