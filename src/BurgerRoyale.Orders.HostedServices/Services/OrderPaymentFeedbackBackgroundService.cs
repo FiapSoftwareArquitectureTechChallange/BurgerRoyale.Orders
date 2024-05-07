@@ -1,11 +1,10 @@
 ﻿using BurgerRoyale.Orders.Domain.Configuration;
 using BurgerRoyale.Orders.Domain.DTO;
 using BurgerRoyale.Orders.Domain.Interface.Services;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using BurgerRoyale.Orders.HostedServices.Services.Common;
 using Microsoft.Extensions.Options;
 
-namespace BurgerRoyale.Orders.Infrastructure.HostedServices.SQSBackgroundServices;
+namespace BurgerRoyale.Orders.HostedServices.Services;
 
 public class OrderPaymentFeedbackBackgroundService : SQSBackgroundService<PaymentFeedbackDto>
 {
@@ -39,6 +38,6 @@ public class OrderPaymentFeedbackBackgroundService : SQSBackgroundService<Paymen
                 message.OrderId
             );
         }
-        
+
     }
 }

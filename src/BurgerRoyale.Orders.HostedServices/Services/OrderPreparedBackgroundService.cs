@@ -2,11 +2,10 @@
 using BurgerRoyale.Orders.Domain.DTO;
 using BurgerRoyale.Orders.Domain.Enumerators;
 using BurgerRoyale.Orders.Domain.Interface.Services;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using BurgerRoyale.Orders.HostedServices.Services.Common;
 using Microsoft.Extensions.Options;
 
-namespace BurgerRoyale.Orders.Infrastructure.HostedServices.SQSBackgroundServices;
+namespace BurgerRoyale.Orders.HostedServices.Services;
 
 public class OrderPreparedBackgroundService : SQSBackgroundService<OrderPreparedDto>
 {
@@ -40,6 +39,6 @@ public class OrderPreparedBackgroundService : SQSBackgroundService<OrderPrepared
                 message.OrderId
             );
         }
-        
+
     }
 }

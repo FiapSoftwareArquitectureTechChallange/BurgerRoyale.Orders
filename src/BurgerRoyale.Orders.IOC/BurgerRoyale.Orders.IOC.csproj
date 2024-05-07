@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BurgerRoyale.Orders.HostedServices\BurgerRoyale.Orders.HostedServices.csproj" />
     <ProjectReference Include="..\BurgerRoyale.Orders.Application\BurgerRoyale.Orders.Application.csproj" />
     <ProjectReference Include="..\BurgerRoyale.Orders.Infrastructure\BurgerRoyale.Orders.Infrastructure.csproj" />
   </ItemGroup>

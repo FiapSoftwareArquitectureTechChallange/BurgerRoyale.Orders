@@ -1,4 +1,4 @@
-﻿using BurgerRoyale.Orders.Infrastructure.HostedServices.SQSBackgroundServices;
+﻿using BurgerRoyale.Orders.HostedServices.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics.CodeAnalysis;
 

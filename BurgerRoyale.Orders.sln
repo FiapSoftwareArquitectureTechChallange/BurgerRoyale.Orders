@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BurgerRoyale.Orders.Integra
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BurgerRoyale.Orders.IOC", "src\BurgerRoyale.Orders.IOC\BurgerRoyale.Orders.IOC.csproj", "{AFDD3433-DB10-4A07-B07D-FD6C24E9C5E3}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BurgerRoyale.Orders.HostedServices", "src\BurgerRoyale.Orders.HostedServices\BurgerRoyale.Orders.HostedServices.csproj", "{6D12712D-DC48-4DB3-ADF3-54088F2E6388}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,10 @@ Global
 		{AFDD3433-DB10-4A07-B07D-FD6C24E9C5E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AFDD3433-DB10-4A07-B07D-FD6C24E9C5E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AFDD3433-DB10-4A07-B07D-FD6C24E9C5E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D12712D-DC48-4DB3-ADF3-54088F2E6388}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D12712D-DC48-4DB3-ADF3-54088F2E6388}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D12712D-DC48-4DB3-ADF3-54088F2E6388}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D12712D-DC48-4DB3-ADF3-54088F2E6388}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -67,6 +73,7 @@ Global
 		{8854E76D-4B2B-4019-A106-D9291C298713} = {F4455E74-59D9-4C06-B57A-637DAB121AA0}
 		{1D5B28DA-A090-4413-A409-034213734F14} = {054E3A0A-4E00-49C3-B2E0-DF7D09CA5C51}
 		{AFDD3433-DB10-4A07-B07D-FD6C24E9C5E3} = {F4455E74-59D9-4C06-B57A-637DAB121AA0}
+		{6D12712D-DC48-4DB3-ADF3-54088F2E6388} = {F4455E74-59D9-4C06-B57A-637DAB121AA0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {40D2B100-27D3-4760-B232-BC1AAACF7E1A}

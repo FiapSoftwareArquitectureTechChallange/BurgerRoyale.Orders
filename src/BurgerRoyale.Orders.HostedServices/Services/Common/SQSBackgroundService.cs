@@ -1,8 +1,6 @@
 ﻿using BurgerRoyale.Orders.Domain.Interface.IntegrationServices;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
-namespace BurgerRoyale.Orders.Infrastructure.HostedServices.SQSBackgroundServices;
+namespace BurgerRoyale.Orders.HostedServices.Services.Common;
 
 public abstract class SQSBackgroundService<TMessage> : BackgroundService, IHostedService
 {
