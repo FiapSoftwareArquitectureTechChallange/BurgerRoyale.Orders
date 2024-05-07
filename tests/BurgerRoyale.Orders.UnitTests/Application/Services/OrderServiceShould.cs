@@ -1,11 +1,15 @@
 ﻿using BurgerRoyale.Orders.Application.Services;
+using BurgerRoyale.Orders.Domain.Configuration;
 using BurgerRoyale.Orders.Domain.DTO;
 using BurgerRoyale.Orders.Domain.Entities;
 using BurgerRoyale.Orders.Domain.Enumerators;
 using BurgerRoyale.Orders.Domain.Helpers;
+using BurgerRoyale.Orders.Domain.Interface.IntegrationServices;
 using BurgerRoyale.Orders.Domain.Interface.Repositories;
 using BurgerRoyale.Orders.Domain.Interface.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
@@ -15,7 +19,10 @@ public class OrderServiceShould
 {
     private readonly Mock<IOrderRepository> _orderRepositoryMock;
     private readonly Mock<IProductRepository> _productRepositoryMock;
-    private readonly Mock<IHttpContextAccessor> _httpContextAccessor;
+    private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
+    private readonly Mock<IMessageService> _messageServiceMock;
+    private readonly Mock<IOptions<MessageQueuesConfiguration>> _messageQueuesConfigurationMock;
+    private readonly Mock<ILogger<OrderService>> _loggerMock;
 
     private readonly IOrderService _orderService;
 
@@ -23,12 +30,28 @@ public class OrderServiceShould
     {
         _orderRepositoryMock = new Mock<IOrderRepository>();
         _productRepositoryMock = new Mock<IProductRepository>();
-        _httpContextAccessor = new Mock<IHttpContextAccessor>();
+        _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+        _messageServiceMock = new Mock<IMessageService>();
+        _messageQueuesConfigurationMock = new Mock<IOptions<MessageQueuesConfiguration>>();
+        _loggerMock = new Mock<ILogger<OrderService>>();
+
+        _messageQueuesConfigurationMock
+            .Setup(x => x.Value)
+            .Returns(new MessageQueuesConfiguration
+            {
+                OrderPaymentFeedbackQueue = "OrderPaymentFeedbackQueue",
+                OrderPaymentRequestQueue = "OrderPaymentRequestQueue",
+                OrderPreparationRequestQueue = "OrderPreparationRequestQueue",
+                OrderPreparedQueue = "OrderPreparedQueue"
+            });
 
         _orderService = new OrderService(
             _orderRepositoryMock.Object, 
             _productRepositoryMock.Object,
-            _httpContextAccessor.Object
+            _httpContextAccessorMock.Object,
+            _messageServiceMock.Object,
+            _messageQueuesConfigurationMock.Object,
+            _loggerMock.Object
         );
     }
 
@@ -83,6 +106,15 @@ public class OrderServiceShould
                     order.OrderProducts.Count() == 1)),
                 Times.Once());
 
+        _messageServiceMock
+            .Verify(
+                service => service.SendMessageAsync(
+                    "OrderPaymentRequestQueue",
+                    It.IsAny<PaymentRequestDto>()
+                ),
+                Times.Once
+            );
+
         #endregion Assert(Then)
     }
 
@@ -130,7 +162,7 @@ public class OrderServiceShould
         #region Assert(Then)
 
         Assert.NotNull(exception);
-        Assert.Equal("Produto(s) inválido(s).", exception.Message);
+        Assert.Equal("Invalid(s) product(s).", exception.Message);
 
         #endregion Assert(Then)
     }
@@ -231,7 +263,7 @@ public class OrderServiceShould
             .ReturnsAsync(orderList);
 
         _orderRepositoryMock
-            .Setup(x => x.GetByIdAsync(orderId))
+            .Setup(x => x.GetOrder(orderId))
             .ReturnsAsync(order);
 
         #endregion Arrange(Given)
@@ -307,7 +339,7 @@ public class OrderServiceShould
         #region Assert(Then)
 
         Assert.NotNull(exception);
-        Assert.Equal("Pedido inválido.", exception.Message);
+        Assert.Equal("Order doesn't exist.", exception.Message);
 
         _orderRepositoryMock
             .Verify(
@@ -356,7 +388,7 @@ public class OrderServiceShould
             .ReturnsAsync(orderList);
 
         _orderRepositoryMock
-            .Setup(x => x.GetByIdAsync(orderId))
+            .Setup(x => x.GetOrder(orderId))
             .ReturnsAsync(order);
 
         #endregion Arrange(Given)
@@ -418,7 +450,7 @@ public class OrderServiceShould
             .ReturnsAsync(orderList);
 
         _orderRepositoryMock
-            .Setup(x => x.GetByIdAsync(orderId))
+            .Setup(x => x.GetOrder(orderId))
             .ReturnsAsync(order);
 
         #endregion Arrange(Given)
@@ -432,7 +464,7 @@ public class OrderServiceShould
         #region Assert(Then)
 
         Assert.NotNull(exception);
-        Assert.Equal("Pedido inválido.", exception.Message);
+        Assert.Equal("Order doesn't exist.", exception.Message);
 
         _orderRepositoryMock
             .Verify(
@@ -481,7 +513,7 @@ public class OrderServiceShould
             .ReturnsAsync(orderList);
 
         _orderRepositoryMock
-            .Setup(x => x.GetByIdAsync(orderId))
+            .Setup(x => x.GetOrder(orderId))
             .ReturnsAsync(order);
 
         #endregion Arrange(Given)
@@ -495,7 +527,7 @@ public class OrderServiceShould
         #region Assert(Then)
 
         Assert.NotNull(exception);
-        Assert.Equal($"Pedido já possui status {orderStatus.GetDescription()}", exception.Message);
+        Assert.Equal($"Order already has {orderStatus.GetDescription()} status", exception.Message);
 
         _orderRepositoryMock
             .Verify(
@@ -503,6 +535,112 @@ public class OrderServiceShould
                     order.OrderProducts.Count() == 1 &&
                     order.UserId == order.UserId)),
                 Times.Never());
+
+        #endregion Assert(Then)
+    }
+
+    [Fact]
+    public async Task GiveUpdatePaymentStatusAsync_WhenOrderNotWaitingPayment_ThenShouldThrowDomainException()
+    {
+        #region Arrange(Given)
+
+        Order order = new(Guid.NewGuid());
+        order.SetStatus(OrderStatus.PagamentoReprovado);
+
+        _orderRepositoryMock
+            .Setup(x => x.GetOrder(order.Id))
+            .ReturnsAsync(order);
+
+        #endregion Arrange(Given)
+
+        #region Act(When)
+
+        var exception = await Record.ExceptionAsync(async () => await _orderService.UpdatePaymentStatusAsync(order.Id, true));
+
+        #endregion Act(When)
+
+        #region Assert(Then)
+
+        Assert.NotNull(exception);
+        Assert.Equal("Order doesn't have pending payment", exception.Message);
+
+        #endregion Assert(Then)
+    }
+
+    [Fact]
+    public async Task GiveUpdatePaymentStatusAsync_WhenPaymentNotProcessedWithSuccess_ThenShouldUpdateStatus()
+    {
+        #region Arrange(Given)
+
+        Order order = new(Guid.NewGuid());
+        order.SetStatus(OrderStatus.PagamentoPendente);
+
+        _orderRepositoryMock
+            .Setup(x => x.GetOrder(order.Id))
+            .ReturnsAsync(order);
+
+        #endregion Arrange(Given)
+
+        #region Act(When)
+
+        var exception = await Record.ExceptionAsync(async () => await _orderService.UpdatePaymentStatusAsync(order.Id, false));
+
+        #endregion Act(When)
+
+        #region Assert(Then)
+
+        Assert.Null(exception);
+
+        _orderRepositoryMock
+            .Verify(
+                x => x.UpdateAsync(It.Is<Order>(y => y.Status == OrderStatus.PagamentoReprovado)),
+                Times.Once
+            );
+
+        _messageServiceMock
+            .Verify(
+                x => x.SendMessageAsync(It.IsAny<string>(), It.IsAny<object>()),
+                Times.Never
+            );
+
+        #endregion Assert(Then)
+    }
+
+    [Fact]
+    public async Task GiveUpdatePaymentStatusAsync_WhenPaymentProcessedWithSuccess_ThenShouldUpdateStatusAndRequestPreparation()
+    {
+        #region Arrange(Given)
+
+        Order order = new(Guid.NewGuid());
+        order.SetStatus(OrderStatus.PagamentoPendente);
+
+        _orderRepositoryMock
+            .Setup(x => x.GetOrder(order.Id))
+            .ReturnsAsync(order);
+
+        #endregion Arrange(Given)
+
+        #region Act(When)
+
+        var exception = await Record.ExceptionAsync(async () => await _orderService.UpdatePaymentStatusAsync(order.Id, true));
+
+        #endregion Act(When)
+
+        #region Assert(Then)
+
+        Assert.Null(exception);
+
+        _orderRepositoryMock
+            .Verify(
+                x => x.UpdateAsync(It.Is<Order>(y => y.Status == OrderStatus.EmPreparacao)),
+                Times.Once
+            );
+
+        _messageServiceMock
+            .Verify(
+                x => x.SendMessageAsync(It.IsAny<string>(), It.IsAny<object>()),
+                Times.Once
+            );
 
         #endregion Assert(Then)
     }

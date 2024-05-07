@@ -1,6 +1,4 @@
 ﻿using BurgerRoyale.Orders.Domain.Entities;
-using BurgerRoyale.Orders.Domain.Enumerators;
-using BurgerRoyale.Orders.Domain.Exceptions;
 using Xunit;
 
 namespace BurgerRoyale.Orders.UnitTests.Domain.Validation;
@@ -38,40 +36,6 @@ public class OrderShould
         decimal expectedPrince = (product1Price * product1Quantity) + (product2Price * product2Quantity);
 
         Assert.Equal(order.TotalPrice, expectedPrince);
-
-        #endregion
-    }
-    
-    [Fact]
-    public void Not_Update_Status_To_Received_When_Payment_Is_Already_Aproved()
-    {
-		#region Arrange(Given)
-
-		Order order = new(Guid.Empty);
-
-        order.SetStatus(OrderStatus.PagamentoAprovado);
-
-        #endregion
-
-        #region Act(When)
-
-        Exception? threwException = null;
-
-        try
-        {
-            order.SetStatus(OrderStatus.PagamentoPendente);
-        } catch (Exception ex)
-        {
-            threwException = ex;
-        }
-
-        #endregion
-
-        #region Assert(Then)
-
-        Assert.NotNull(threwException);
-        Assert.Equal(typeof(DomainException), threwException.GetType());
-        Assert.Equal("O pagamento já foi aprovado.", threwException.Message);
 
         #endregion
     }
