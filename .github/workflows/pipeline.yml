@@ -13,6 +13,7 @@ env:
 
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
 
     steps:
@@ -36,6 +37,7 @@ jobs:
         dotnet test
 
   analize:
+    name: SonarCloud analysis
     runs-on: windows-latest
     needs: build
     steps:
@@ -78,8 +80,7 @@ jobs:
         shell: powershell
         run: |
           .\.sonar\scanner\dotnet-sonarscanner begin /k:"BurgerRoyale.Orders" /o:"3soat-burger-royale" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
-          dotnet build
-          dotnet test ./tests/BurgerRoyale.Orders.UnitTests/BurgerRoyale.Orders.UnitTests.csproj --collect "Code Coverage"
+          dotnet test .\tests\BurgerRoyale.Orders.UnitTests\BurgerRoyale.Orders.UnitTests.csproj --collect "Code Coverage"
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
         
   publishImage:
