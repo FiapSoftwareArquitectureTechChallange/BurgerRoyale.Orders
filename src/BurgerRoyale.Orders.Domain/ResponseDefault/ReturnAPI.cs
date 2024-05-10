@@ -17,16 +17,16 @@ namespace BurgerRoyale.Orders.Domain.ResponseDefault
 			get { return (int)StatusCode == 204; }
 		}
 
-		public string Message { get; set; }
-		private Exception _exception;
+		public string? Message { get; set; }
+		private Exception? _exception;
 
-		public Dictionary<string, string[]> ModelState { get; set; }
+		public Dictionary<string, string[]>? ModelState { get; set; }
 
 		[JsonIgnore]
 		public HttpStatusCode StatusCode { get; set; } = HttpStatusCode.OK;
 
 		[JsonIgnore]
-		public Exception Exception
+		public Exception? Exception
 		{
 			get
 			{

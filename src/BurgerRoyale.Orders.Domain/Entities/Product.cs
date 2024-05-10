@@ -10,8 +10,8 @@ public class Product : Entity
     public decimal Price { get; private set; }
     public ProductCategory Category { get; set; }
 
-    public virtual IEnumerable<ProductImage> Images { get; set; }
-    public virtual IEnumerable<OrderProduct> OrderProducts { get; set; }
+    public virtual IEnumerable<ProductImage>? Images { get; set; }
+    public virtual IEnumerable<OrderProduct>? OrderProducts { get; set; }
 
     public Product(string name, string description, decimal price, ProductCategory category)
     {

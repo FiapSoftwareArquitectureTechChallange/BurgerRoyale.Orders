@@ -9,7 +9,7 @@ public abstract class SQSBackgroundService<TMessage> : BackgroundService, IHoste
 
     protected IServiceProvider _serviceProvider;
 
-    public SQSBackgroundService(IServiceScopeFactory serviceScopeFactory, string queueName)
+    protected SQSBackgroundService(IServiceScopeFactory serviceScopeFactory, string queueName)
     {
         _serviceScopeFactory = serviceScopeFactory;
         _queueName = queueName;

@@ -9,7 +9,7 @@ namespace BurgerRoyale.Orders.Infrastructure.RepositoriesStandard
 	{
 		protected readonly ApplicationDbContext _context;
 
-		public Repository(ApplicationDbContext applicationDbContext)
+		protected Repository(ApplicationDbContext applicationDbContext)
 		{
 			_context = applicationDbContext;
 		}
@@ -29,7 +29,7 @@ namespace BurgerRoyale.Orders.Infrastructure.RepositoriesStandard
 			return await _context.Set<TEntity>().Where(predicate).ToListAsync();
 		}
 
-		public async Task<TEntity> FindFirstDefaultAsync(Expression<Func<TEntity, bool>> predicate)
+		public async Task<TEntity?> FindFirstDefaultAsync(Expression<Func<TEntity, bool>> predicate)
 		{
 			return await _context.Set<TEntity>().FirstOrDefaultAsync(predicate);
 		}

@@ -44,7 +44,7 @@ namespace BurgerRoyale.Orders.IOC.Configurations
                         ValidIssuer = jwtConfig?.Issuer,
                         ValidAudience = jwtConfig?.Audience,
                         ClockSkew = TimeSpan.Zero,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.SecretKey!))
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig?.SecretKey!))
                     };
                 });
         }

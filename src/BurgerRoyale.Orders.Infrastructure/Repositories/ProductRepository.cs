@@ -23,7 +23,7 @@ namespace BurgerRoyale.Orders.Infrastructure.Repositories
             return await _context.Products.Include(x => x.Images).Where(x => x.Category == category).ToListAsync();
         }
 
-        public async Task<Product> GetProductById(Guid id)
+        public async Task<Product?> GetProductById(Guid id)
         {
             return await _context.Products.Include(x => x.Images).FirstOrDefaultAsync(x => x.Id == id);
         }

@@ -11,7 +11,8 @@ namespace BurgerRoyale.Orders.Domain.Interface.ResponseDefault
 		Exception Exception { get; }
 		Dictionary<string, string[]> ModelState { get; }
 	}
-	public interface IReturnAPI<TData>
+
+	public interface IReturnAPI<out TData>
 	{
 		TData Data { get; }
 	}

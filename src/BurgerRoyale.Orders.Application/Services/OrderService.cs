@@ -92,11 +92,17 @@ public class OrderService : IOrderService
     public async Task<int> GenerateOrderNumber()
     {
         var anyUnclosedOrders = await _orderRepository.AnyAsync(x => x.Status == OrderStatus.Finalizado);
+
         if (anyUnclosedOrders)
         {
-            var lastOrder = (await _orderRepository.GetAllAsync()).OrderByDescending(x => x.OrderTime).FirstOrDefault();
-            return lastOrder.OrderNumber + 1;
+            var lastOrder = (await _orderRepository.GetAllAsync())
+                    .OrderByDescending(x => x.OrderTime)
+                    .FirstOrDefault();
+
+            if (lastOrder != null)
+                return lastOrder.OrderNumber + 1;
         }
+
         return 1;
     }
 

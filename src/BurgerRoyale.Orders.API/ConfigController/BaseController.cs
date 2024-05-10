@@ -1,4 +1,5 @@
-﻿using BurgerRoyale.Orders.Domain.ResponseDefault;
+﻿using BurgerRoyale.Orders.Domain.Exceptions;
+using BurgerRoyale.Orders.Domain.ResponseDefault;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using System.Net;
@@ -7,20 +8,6 @@ namespace BurgerRoyale.Orders.API.ConfigController
 {
 	public class BaseController : ControllerBase
 	{
-		public ActionResult<T> StatusCode<T>([ActionResultObjectValue] T returnAPI) where T : ReturnAPI
-		{
-			var statusCode = GetStatus(returnAPI);
-
-			if (statusCode != null)
-			{
-				var result = new ObjectResult(returnAPI) { StatusCode = (int)statusCode };
-
-				return result;
-			}
-
-			throw new Exception("Não foi informado StatusCode");
-		}
-
 		public IActionResult IStatusCode<T>([ActionResultObjectValue] T returnAPI) where T : ReturnAPI
 		{
 			var statusCode = GetStatus(returnAPI);
@@ -32,21 +19,19 @@ namespace BurgerRoyale.Orders.API.ConfigController
 				return result;
 			}
 
-			throw new Exception("Não foi informado StatusCode");
+			throw new DomainException("Não foi informado StatusCode");
 		}
 
-		private HttpStatusCode? GetStatus(object obj)
+		private static HttpStatusCode? GetStatus(object obj)
 		{
 			var type = obj.GetType();
 
-			if (obj.GetType().Name.StartsWith("ReturnAPI"))
+			if (type != null && type.Name.StartsWith("ReturnAPI"))
 			{
-				return (HttpStatusCode)obj.GetType().GetProperty("StatusCode").GetValue(obj);
+				return (HttpStatusCode?)type.GetProperty("StatusCode")?.GetValue(obj);
 			}
-			else
-			{
-				return null;
-			}
+
+			return null;
 		}
 	}
 }

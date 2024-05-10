@@ -38,7 +38,7 @@ namespace BurgerRoyale.Orders.Domain.ResponseDefault
 
 			}
 		}
-		public T Data { get; set; }
+		public T? Data { get; set; }
 	}
 
 	public class ReturnAPIDataTableResponse<T> : ReturnAPI, IReturnDataTable<T>

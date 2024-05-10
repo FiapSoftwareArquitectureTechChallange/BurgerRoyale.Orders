@@ -71,7 +71,7 @@ public class OrderController : BaseController
     [ProducesDefaultResponseType]
     public async Task<IActionResult> UpdateOrderStatus(Guid id, [FromQuery] OrderStatus? orderStatus)
     {
-        await _orderService.UpdateOrderStatusAsync(id, orderStatus.Value);
+        await _orderService.UpdateOrderStatusAsync(id, orderStatus.GetValueOrDefault());
         return IStatusCode(new ReturnAPI(HttpStatusCode.NoContent));
     }
 

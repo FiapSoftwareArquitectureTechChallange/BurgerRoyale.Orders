@@ -6,10 +6,4 @@
 
 		public int Skip { get; set; }
 	}
-
-	public class FilterPage<TClassFilter> : FilterPage where TClassFilter : class
-	{
-		public TClassFilter Filter { get; set; }
-	}
-
 }

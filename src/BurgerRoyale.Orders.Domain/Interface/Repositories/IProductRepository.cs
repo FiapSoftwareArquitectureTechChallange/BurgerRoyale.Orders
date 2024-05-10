@@ -8,6 +8,6 @@ namespace BurgerRoyale.Orders.Domain.Interface.Repositories
 	{
 		Task <IEnumerable<Product>> GetAll();
 		Task <IEnumerable<Product>> GetAllByCategory(ProductCategory category);
-		Task <Product> GetProductById(Guid id);
+		Task <Product?> GetProductById(Guid id);
 	}
 }

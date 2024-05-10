@@ -19,7 +19,7 @@ namespace BurgerRoyale.Orders.API.ConfigController
 
 				var errorList = context.ModelState.ToDictionary(
 														kvp => kvp.Key,
-														kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+														kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToArray()
 													);
 
 				context.Result = new ObjectResult(new ReturnAPI
