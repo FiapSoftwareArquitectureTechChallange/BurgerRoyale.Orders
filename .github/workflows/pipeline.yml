@@ -72,7 +72,7 @@ jobs:
         run: |
           New-Item -Path .\.sonar\scanner -ItemType Directory
           dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
-          dotnet tool install --global dotnet-coverage
+          dotnet tool update --global dotnet-coverage --tool-path .\.sonar\scanner
 
       - name: Build and analyze
         env:
