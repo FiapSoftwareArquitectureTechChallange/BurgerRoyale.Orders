@@ -2,14 +2,14 @@
 
 namespace BurgerRoyale.Orders.HostedServices.Services.Common;
 
-public abstract class SQSBackgroundService<TMessage> : BackgroundService, IHostedService
+public abstract class SqsBackgroundService<TMessage> : BackgroundService, IHostedService
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly string _queueName;
 
     protected IServiceProvider _serviceProvider;
 
-    protected SQSBackgroundService(IServiceScopeFactory serviceScopeFactory, string queueName)
+    protected SqsBackgroundService(IServiceScopeFactory serviceScopeFactory, string queueName)
     {
         _serviceScopeFactory = serviceScopeFactory;
         _queueName = queueName;

@@ -15,7 +15,7 @@ namespace BurgerRoyale.Orders.IOC.Configurations
             IConfiguration configuration
         )
         {
-            services.Configure<AWSConfiguration>
+            services.Configure<AwsConfiguration>
             (
                 options => configuration.GetSection("AWS").Bind(options)
             );

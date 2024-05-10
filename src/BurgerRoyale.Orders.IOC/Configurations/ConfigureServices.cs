@@ -22,7 +22,7 @@ namespace BurgerRoyale.Orders.IOC.Configurations
 			services.AddScoped<IProductService, ProductService>();
 			services.AddScoped<IOrderService, OrderService>();
 
-            services.AddScoped<IMessageService, AWSSQSService>();
+            services.AddScoped<IMessageService, AwsSqsService>();
 
             #endregion Services
 

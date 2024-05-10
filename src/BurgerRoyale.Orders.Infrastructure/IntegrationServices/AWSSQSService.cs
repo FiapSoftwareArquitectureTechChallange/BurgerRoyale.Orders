@@ -10,12 +10,12 @@ using System.Text.Json;
 
 namespace BurgerRoyale.Orders.Infrastructure.IntegrationServices;
 
-public class AWSSQSService : IMessageService
+public class AwsSqsService : IMessageService
 {
-    private readonly AWSConfiguration _awsConfiguration;
+    private readonly AwsConfiguration _awsConfiguration;
     private readonly IAmazonSQS _amazonSQSClient;
 
-    public AWSSQSService(IOptions<AWSConfiguration> awsConfiguration)
+    public AwsSqsService(IOptions<AwsConfiguration> awsConfiguration)
     {
         _awsConfiguration = awsConfiguration.Value;
         _amazonSQSClient = CreateClient();

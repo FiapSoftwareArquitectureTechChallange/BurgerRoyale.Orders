@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace BurgerRoyale.Orders.HostedServices.Services;
 
-public class OrderPreparedBackgroundService : SQSBackgroundService<OrderPreparedDto>
+public class OrderPreparedBackgroundService : SqsBackgroundService<OrderPreparedDto>
 {
     private readonly IOrderService _orderService;
     private readonly ILogger<OrderPreparedBackgroundService> _logger;

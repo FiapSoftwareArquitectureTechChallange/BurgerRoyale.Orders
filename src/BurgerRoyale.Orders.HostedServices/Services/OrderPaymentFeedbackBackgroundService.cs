@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace BurgerRoyale.Orders.HostedServices.Services;
 
-public class OrderPaymentFeedbackBackgroundService : SQSBackgroundService<PaymentFeedbackDto>
+public class OrderPaymentFeedbackBackgroundService : SqsBackgroundService<PaymentFeedbackDto>
 {
     private readonly IOrderService _orderService;
     private readonly ILogger<OrderPaymentFeedbackBackgroundService> _logger;

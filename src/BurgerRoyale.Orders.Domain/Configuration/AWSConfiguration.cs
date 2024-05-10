@@ -1,6 +1,6 @@
 ﻿namespace BurgerRoyale.Orders.Domain.Configuration
 {
-    public class AWSConfiguration
+    public class AwsConfiguration
     {
         public string? AccessKey { get; set; } = string.Empty;
         public string? SecretKey { get; set; } = string.Empty;
