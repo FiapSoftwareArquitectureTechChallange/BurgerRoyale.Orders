@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System.Diagnostics.CodeAnalysis;
 
 #nullable disable
 
@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BurgerRoyale.Orders.Infrastructure.Migrations
 {
     /// <inheritdoc />
+    [ExcludeFromCodeCoverage]
     public partial class AddedOrderNumber : Migration
     {
         /// <inheritdoc />

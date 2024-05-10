@@ -1,10 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System.Diagnostics.CodeAnalysis;
 
 #nullable disable
 
 namespace BurgerRoyale.Orders.Infrastructure.Migrations
 {
-	/// <inheritdoc />
+    /// <inheritdoc />
+    [ExcludeFromCodeCoverage]
 	public partial class InitialCreate : Migration
 	{
 		/// <inheritdoc />

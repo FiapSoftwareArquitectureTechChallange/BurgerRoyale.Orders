@@ -1,11 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System.Diagnostics.CodeAnalysis;
 
 #nullable disable
 
 namespace BurgerRoyale.Orders.Infrastructure.Migrations
 {
-	/// <inheritdoc />
-	public partial class ChangingEmailToString : Migration
+    /// <inheritdoc />
+    [ExcludeFromCodeCoverage]
+    public partial class ChangingEmailToString : Migration
 	{
 		/// <inheritdoc />
 		protected override void Up(MigrationBuilder migrationBuilder)
