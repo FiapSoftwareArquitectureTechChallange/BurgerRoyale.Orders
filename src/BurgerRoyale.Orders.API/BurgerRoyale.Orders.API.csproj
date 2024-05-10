@@ -45,12 +45,4 @@
     <ProjectReference Include="..\BurgerRoyale.Orders.IOC\BurgerRoyale.Orders.IOC.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-	<SonarQubeSetting Include="sonar.coverage.exclusions">
-		<Value>
-		    Program.cs
-		</Value>
-	</SonarQubeSetting>
-  </ItemGroup>
-
 </Project>
