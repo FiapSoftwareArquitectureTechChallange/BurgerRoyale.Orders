@@ -13,7 +13,7 @@ env:
 
 jobs:
   build:
-    name: Build
+    name: Build and test
     runs-on: ubuntu-latest
 
     steps:
@@ -72,6 +72,7 @@ jobs:
         run: |
           New-Item -Path .\.sonar\scanner -ItemType Directory
           dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
+          dotnet tool install --global dotnet-coverage
 
       - name: Build and analyze
         env:
@@ -79,8 +80,9 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"BurgerRoyale.Orders" /o:"3soat-burger-royale" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
-          dotnet test .\tests\BurgerRoyale.Orders.UnitTests\BurgerRoyale.Orders.UnitTests.csproj --collect "Code Coverage"
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"BurgerRoyale.Orders" /o:"3soat-burger-royale" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
+          dotnet build --configuration Release
+          dotnet-coverage collect 'dotnet test .\tests\BurgerRoyale.Orders.UnitTests\BurgerRoyale.Orders.UnitTests.csproj' -f xml -o 'coverage.xml'
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
         
   publishImage:
