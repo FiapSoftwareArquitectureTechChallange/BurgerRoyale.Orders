@@ -28,4 +28,12 @@
     <ProjectReference Include="..\BurgerRoyale.Orders.Domain\BurgerRoyale.Orders.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+	<SonarQubeSetting Include="sonar.coverage.exclusions">
+		<Value>
+			Migrations\**
+		</Value>
+	</SonarQubeSetting>
+  </ItemGroup>
+
 </Project>
