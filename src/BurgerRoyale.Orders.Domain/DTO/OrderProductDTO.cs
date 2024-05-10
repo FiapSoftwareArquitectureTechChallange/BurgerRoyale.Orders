@@ -12,7 +12,7 @@ namespace BurgerRoyale.Orders.Domain.DTO
         public OrderProductDTO(OrderProduct orderProduct)
         {
 			ProductId = orderProduct.ProductId;
-			ProductName = orderProduct.Product.Name;
+			ProductName = orderProduct.Product?.Name ?? string.Empty;
 			Quantity = orderProduct.Quantity;
 			Price = orderProduct.ProductPrice;
         }

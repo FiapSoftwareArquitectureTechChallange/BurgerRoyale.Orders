@@ -220,8 +220,8 @@ public class OrderServiceShould
 
         Assert.NotNull(orders);
         Assert.Single(orders);
-        Assert.Equal(30, orders.FirstOrDefault().TotalPrice);
-        Assert.Equal(OrderStatus.EmPreparacao.GetDescription(), orders.FirstOrDefault().Status);
+        Assert.Equal(30, orders.FirstOrDefault()?.TotalPrice);
+        Assert.Equal(OrderStatus.EmPreparacao.GetDescription(), orders.FirstOrDefault()?.Status);
 
         #endregion Assert(Then)
     }

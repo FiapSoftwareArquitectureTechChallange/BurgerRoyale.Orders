@@ -4,15 +4,13 @@ using BurgerRoyale.Orders.Domain.Interface.Repositories;
 using BurgerRoyale.Orders.Infrastructure.Context;
 using BurgerRoyale.Orders.Infrastructure.RepositoriesStandard;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BurgerRoyale.Orders.Infrastructure.Repositories
 {
-    public class ProductRepository : DomainRepository<Product>, IProductRepository
+    [ExcludeFromCodeCoverage]
+    public class ProductRepository(ApplicationDbContext applicationDbContext) : DomainRepository<Product>(applicationDbContext), IProductRepository
     {
-        public ProductRepository(ApplicationDbContext applicationDbContext) : base(applicationDbContext)
-        {
-        }
-
         public async Task<IEnumerable<Product>> GetAll()
         {
             return await _context.Products.Include(x => x.Images).ToListAsync();

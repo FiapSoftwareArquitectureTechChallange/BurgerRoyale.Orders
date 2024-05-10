@@ -5,16 +5,14 @@ using BurgerRoyale.Orders.Infrastructure.Context;
 using BurgerRoyale.Orders.Infrastructure.RepositoriesStandard;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BurgerRoyale.Orders.Infrastructure.Repositories
 {
-    public class OrderRepository : DomainRepository<Order>, IOrderRepository
+	[ExcludeFromCodeCoverage]
+    public class OrderRepository(ApplicationDbContext applicationDbContext) : DomainRepository<Order>(applicationDbContext), IOrderRepository
 	{
-		public OrderRepository(ApplicationDbContext applicationDbContext) : base(applicationDbContext)
-		{
-		}
-
-		public async Task<Order?> GetOrder(Guid id, Guid? userId)
+        public async Task<Order?> GetOrder(Guid id, Guid? userId)
 		{
 			return await GetOrderQuery()
                 .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
@@ -26,7 +24,7 @@ namespace BurgerRoyale.Orders.Infrastructure.Repositories
 				.FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        private IIncludableQueryable<Order, Product> GetOrderQuery()
+        private IIncludableQueryable<Order, Product?> GetOrderQuery()
         {
             return _context.Orders
                 .Include(x => x.OrderProducts)

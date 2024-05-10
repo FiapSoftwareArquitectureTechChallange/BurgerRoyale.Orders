@@ -47,7 +47,7 @@ namespace BurgerRoyale.Orders.Domain.ResponseDefault
 
 		public int TotalPages { get; set; }
 
-		public T Data { get; set; }
+		public T? Data { get; set; }
 	}
 
 	public class ReturnAPIDataTableProcess<T> : ReturnAPIDataTable<T>

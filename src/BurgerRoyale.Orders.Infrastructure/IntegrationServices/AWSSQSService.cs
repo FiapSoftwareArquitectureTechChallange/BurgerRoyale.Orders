@@ -81,7 +81,7 @@ public class AWSSQSService : IMessageService
         }
     }
 
-    private AmazonSQSClient CreateClient()
+    private IAmazonSQS CreateClient()
     {
         var credentials = new SessionAWSCredentials(
             _awsConfiguration.AccessKey,

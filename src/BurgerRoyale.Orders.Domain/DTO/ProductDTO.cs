@@ -29,7 +29,7 @@ public class ProductDTO
     {
         if (product.Images != null)
         {
-            var images = product.Images.Select(x => new ProductImageDTO() { Title = x.Title, Url = x.Url });
+            var images = product.Images.Select(x => new ProductImageDTO(x.Title, x.Url));
             Images = images;
         }
         Id = product.Id;

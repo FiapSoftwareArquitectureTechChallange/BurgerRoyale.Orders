@@ -16,7 +16,7 @@ public class HealthCheckStepDefinitions
     }
 
     [Given(@"I want to check the status of my application")]
-    public void GivenIWantToCheckTheStatusOfMyApplication()
+    public static void GivenIWantToCheckTheStatusOfMyApplication()
     {
     }
 

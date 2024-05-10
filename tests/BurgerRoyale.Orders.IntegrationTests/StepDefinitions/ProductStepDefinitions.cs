@@ -100,7 +100,7 @@ public class ProductStepDefinitions
         var products = httpResponse.DeserializeTo<IEnumerable<ProductDTO>>(responseContent);
 
         products.Should().HaveCountGreaterThanOrEqualTo(1);
-        products.All(product => product.Category == category).Should().BeTrue();
+        products?.All(product => product.Category == category).Should().BeTrue();
     }
 
     [When(@"I get this product")]
@@ -124,11 +124,11 @@ public class ProductStepDefinitions
         var product = httpResponse.DeserializeTo<ProductDTO>(responseContent);
 
         product.Should().NotBeNull();
-        product.Id.Should().Be(productAdded.Id);
-        product.Name.Should().Be(productAdded.Name);
-        product.Description.Should().Be(productAdded.Description);
-        product.Category.Should().Be(productAdded.Category);
-        product.Price.Should().Be(productAdded.Price);
+        product?.Id.Should().Be(productAdded.Id);
+        product?.Name.Should().Be(productAdded.Name);
+        product?.Description.Should().Be(productAdded.Description);
+        product?.Category.Should().Be(productAdded.Category);
+        product?.Price.Should().Be(productAdded.Price);
     }
 
     [When(@"I update this product with the following data")]
@@ -160,14 +160,14 @@ public class ProductStepDefinitions
         var updatedProduct = httpResponse.DeserializeTo<ProductDTO>(responseContent);
 
         updatedProduct.Should().NotBeNull();
-        updatedProduct.Id.Should().Be(productAdded.Id);
+        updatedProduct?.Id.Should().Be(productAdded.Id);
 
         var updateRequest = _scenarioContext.Get<RequestProductDTO>("updateRequest");
 
-        updatedProduct.Name.Should().Be(updateRequest.Name);
-        updatedProduct.Description.Should().Be(updateRequest.Description);
-        updatedProduct.Category.Should().Be(updateRequest.Category);
-        updatedProduct.Price.Should().Be(updateRequest.Price);
+        updatedProduct?.Name.Should().Be(updateRequest.Name);
+        updatedProduct?.Description.Should().Be(updateRequest.Description);
+        updatedProduct?.Category.Should().Be(updateRequest.Category);
+        updatedProduct?.Price.Should().Be(updateRequest.Price);
     }
 
     [When(@"I delete this product")]

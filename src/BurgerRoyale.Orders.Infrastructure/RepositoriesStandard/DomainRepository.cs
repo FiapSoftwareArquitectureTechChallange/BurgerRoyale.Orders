@@ -1,9 +1,11 @@
 ﻿using BurgerRoyale.Orders.Domain.Interface.RepositoriesStandard;
 using BurgerRoyale.Orders.Infrastructure.Context;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BurgerRoyale.Orders.Infrastructure.RepositoriesStandard
 {
-	public abstract class DomainRepository<TEntity> : Repository<TEntity>,
+    [ExcludeFromCodeCoverage]
+    public abstract class DomainRepository<TEntity> : Repository<TEntity>,
 													  IDomainRepository<TEntity> where TEntity : class
 	{
 

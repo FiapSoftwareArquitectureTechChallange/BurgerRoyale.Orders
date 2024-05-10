@@ -47,8 +47,11 @@ public class ProductService : IProductService
 		{
 			foreach (var image in productDTO.Images)
 			{
-				var productImage = new ProductImage(image.Title, image.Url, Guid.NewGuid());
-				productImagesList.Add(productImage);
+				if (image != null)
+				{
+                    var productImage = new ProductImage(image.Title, image.Url, Guid.NewGuid());
+                    productImagesList.Add(productImage);
+                }				
 			}
 		}
 

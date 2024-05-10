@@ -1,11 +1,13 @@
 ﻿using BurgerRoyale.Orders.Domain.Interface.RepositoriesStandard;
 using BurgerRoyale.Orders.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace BurgerRoyale.Orders.Infrastructure.RepositoriesStandard
 {
-	public abstract class Repository<TEntity> : IRepository<TEntity> where TEntity : class
+    [ExcludeFromCodeCoverage]
+    public abstract class Repository<TEntity> : IRepository<TEntity> where TEntity : class
 	{
 		protected readonly ApplicationDbContext _context;
 

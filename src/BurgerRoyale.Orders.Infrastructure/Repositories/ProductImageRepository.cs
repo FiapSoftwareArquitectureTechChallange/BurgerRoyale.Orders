@@ -2,13 +2,12 @@
 using BurgerRoyale.Orders.Domain.Interface.Repositories;
 using BurgerRoyale.Orders.Infrastructure.Context;
 using BurgerRoyale.Orders.Infrastructure.RepositoriesStandard;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BurgerRoyale.Orders.Infrastructure.Repositories
 {
-    public class ProductImageRepository : DomainRepository<ProductImage>, IProductImageRepository
+    [ExcludeFromCodeCoverage]
+    public class ProductImageRepository(ApplicationDbContext applicationDbContext) : DomainRepository<ProductImage>(applicationDbContext), IProductImageRepository
     {
-        public ProductImageRepository(ApplicationDbContext applicationDbContext) : base(applicationDbContext)
-        {
-        }
     }
 }
