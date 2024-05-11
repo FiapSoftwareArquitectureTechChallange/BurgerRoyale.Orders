@@ -15,6 +15,11 @@ namespace BurgerRoyale.Orders.IOC.Configurations
             IConfiguration configuration
         )
         {
+            services.Configure<JwtConfiguration>
+            (
+                options => configuration.GetSection("Jwt").Bind(options)
+            );
+
             services.Configure<AwsConfiguration>
             (
                 options => configuration.GetSection("AWS").Bind(options)

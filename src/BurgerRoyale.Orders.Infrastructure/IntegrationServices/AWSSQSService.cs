@@ -1,24 +1,18 @@
-﻿using Amazon;
-using Amazon.Runtime;
-using Amazon.SQS;
+﻿using Amazon.SQS;
 using Amazon.SQS.Model;
-using BurgerRoyale.Orders.Domain.Configuration;
 using BurgerRoyale.Orders.Domain.Exceptions;
 using BurgerRoyale.Orders.Domain.Interface.IntegrationServices;
-using Microsoft.Extensions.Options;
 using System.Text.Json;
 
 namespace BurgerRoyale.Orders.Infrastructure.IntegrationServices;
 
 public class AwsSqsService : IMessageService
 {
-    private readonly AwsConfiguration _awsConfiguration;
-    private readonly IAmazonSQS _amazonSQSClient;
+    private readonly IAmazonSQS _amazonSqsClient;
 
-    public AwsSqsService(IOptions<AwsConfiguration> awsConfiguration)
+    public AwsSqsService(IAmazonSQS amazonSqsClient)
     {
-        _awsConfiguration = awsConfiguration.Value;
-        _amazonSQSClient = CreateClient();
+        _amazonSqsClient = amazonSqsClient;
     }
 
     public async Task<string> SendMessageAsync(string queueName, string message)
@@ -27,7 +21,7 @@ public class AwsSqsService : IMessageService
         {
             string queueUrl = await GetQueueUrl(queueName);
 
-            var response = await _amazonSQSClient.SendMessageAsync(queueUrl, message);
+            var response = await _amazonSqsClient.SendMessageAsync(queueUrl, message);
 
             return response.MessageId;
         }
@@ -59,7 +53,7 @@ public class AwsSqsService : IMessageService
                 MaxNumberOfMessages = maxNumberOfMessages ?? 10
             };
 
-            var response = await _amazonSQSClient.ReceiveMessageAsync(request);
+            var response = await _amazonSqsClient.ReceiveMessageAsync(request);
 
             List<TResponse> messages = new();
 
@@ -67,7 +61,7 @@ public class AwsSqsService : IMessageService
             {
                 messages.Add(JsonSerializer.Deserialize<TResponse>(message.Body)!);
 
-                await _amazonSQSClient.DeleteMessageAsync(queueUrl, message.ReceiptHandle);
+                await _amazonSqsClient.DeleteMessageAsync(queueUrl, message.ReceiptHandle);
             }
 
             return messages;
@@ -81,27 +75,11 @@ public class AwsSqsService : IMessageService
         }
     }
 
-    private IAmazonSQS CreateClient()
-    {
-        var credentials = new SessionAWSCredentials(
-            _awsConfiguration.AccessKey,
-            _awsConfiguration.SecretKey,
-            _awsConfiguration.SessionToken
-        );
-
-        var region = RegionEndpoint.GetBySystemName(_awsConfiguration.Region);
-
-        return new AmazonSQSClient(
-            credentials,
-            region
-        );
-    }
-
     private async Task<string> GetQueueUrl(string queueName)
     {
         try
         {
-            var response = await _amazonSQSClient.GetQueueUrlAsync(
+            var response = await _amazonSqsClient.GetQueueUrlAsync(
                 new GetQueueUrlRequest(queueName)
             );
 
@@ -115,7 +93,7 @@ public class AwsSqsService : IMessageService
 
     private async Task<string> CreateQueue(string queueName)
     {
-        var response = await _amazonSQSClient.CreateQueueAsync(
+        var response = await _amazonSqsClient.CreateQueueAsync(
             new CreateQueueRequest(queueName)
         );
 
