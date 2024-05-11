@@ -94,7 +94,3 @@ app.MapControllers();
 ConfigureDatabase.RunMigrations(app);
 
 app.Run();
-
-
-[ExcludeFromCodeCoverage]
-public partial class Program {}
