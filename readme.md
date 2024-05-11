@@ -2,18 +2,6 @@
 
 Esta solução foi desenvolvida como uma API a ser utilizada na gestão de produtos e pedidos de uma lanchonete.
 
-# Links do projeto
-
-- [Informações do grupo](https://github.com/BrunoICardoso/TechChallenge/wiki)
-- [Arquitetura e desenho](https://github.com/BrunoICardoso/TechChallenge/wiki/Arquitetura-da-Solu%C3%A7%C3%A3o)
-- [Vídeo com explicação da arquitetura](https://youtu.be/Eky5FDs3v8A)
-- [Arquivos Yaml Kubernetes](./Kubernetes)
-- Documentação das APIs
-    - [BurgerRoyale API](https://github.com/BrunoICardoso/TechChallenge/wiki/API-BurgerRoyale)
-    - [FakePaymentService API](https://github.com/BrunoICardoso/TechChallenge/wiki/API-de-pagamentos)
-    - [Collection do Postman](./BurgerRoyale_Collection.postman_collection.json)
-    - [Guia de utilização](https://github.com/BrunoICardoso/TechChallenge/wiki/Guia-de-utiliza%C3%A7%C3%A3o)
-
 # Kubernetes Deployment Scripts
 
 Este repositório contém scripts para implantar recursos no Kubernetes usando o Docker Desktop.
@@ -62,8 +50,6 @@ Os scripts estão disponíveis tanto para ambientes Windows (PowerShell) quanto 
 
 _________________________________________________
 
-- Após a conclusão do processo de inicialização, as APIs estarão disponíveis em http://localhost:30000 e http://localhost:30001. 
+- Após a conclusão do processo de inicialização, a API estará disponível em http://localhost:30000. 
 
     - No endereço http://localhost:30000/swagger é possível acessar a documentação dos endpoints disponíveis na API do BurgerRoyale.
-    - No endereço http://localhost:30001/swagger é possível acessar a documentação dos endpoints disponíveis na API do Serviço de Pagamento Fake.
-    - Uma collection do Postman (`BurgerRoyale_Collection.postman_collection.json`) também se encontra disponível no repositório para facilitar a utilização das APIs.
