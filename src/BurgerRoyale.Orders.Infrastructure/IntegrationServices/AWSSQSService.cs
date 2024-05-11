@@ -79,9 +79,7 @@ public class AwsSqsService : IMessageService
     {
         try
         {
-            var response = await _amazonSqsClient.GetQueueUrlAsync(
-                new GetQueueUrlRequest(queueName)
-            );
+            var response = await _amazonSqsClient.GetQueueUrlAsync(queueName);
 
             return response.QueueUrl;
         }
@@ -93,9 +91,7 @@ public class AwsSqsService : IMessageService
 
     private async Task<string> CreateQueue(string queueName)
     {
-        var response = await _amazonSqsClient.CreateQueueAsync(
-            new CreateQueueRequest(queueName)
-        );
+        var response = await _amazonSqsClient.CreateQueueAsync(queueName);
 
         return response.QueueUrl;
     }    
