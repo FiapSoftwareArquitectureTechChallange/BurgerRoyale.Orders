@@ -43,6 +43,7 @@ namespace BurgerRoyale.Orders.UnitTests.Application.Services
 				Category = category,
 				Description = description,
 				Price = price,
+				Images = [new ProductImageDTO("Image Title", "url")]
 			};
 
 			#endregion Arrange(Given)
@@ -187,7 +188,8 @@ namespace BurgerRoyale.Orders.UnitTests.Application.Services
 				Category = newCategory,
 				Description = newDescription,
 				Price = newPrice,
-			};
+                Images = [new ProductImageDTO("Image Title", "url")]
+            };
 
 			var product = new Product(productId, "Bacon burger", "", 100, newCategory);
 

@@ -59,6 +59,25 @@ namespace BurgerRoyale.Orders.UnitTests.API.Controllers.Order
         }
 
         [Fact]
+        public async Task GivenGetOrderRequest_WhenGetOrder_ThenShouldReturnWithStatusOk()
+        {
+            // arrange
+            Guid orderId = Guid.NewGuid();
+
+            _orderService
+                .Setup(x => x.GetUserOrderAsync(orderId))
+                .ReturnsAsync(new OrderDTO(OrderMock.Get()));
+
+            // act
+            var response = await _orderController.GetOrder(orderId) as ObjectResult;
+
+            // assert
+            response.Should().NotBeNull();
+            response?.StatusCode.Should().Be((int)HttpStatusCode.OK);
+            response?.Value.Should().BeOfType<ReturnAPI<OrderDTO>>();
+        }
+
+        [Fact]
         public async Task GivenUpdateOrderStatusRequest_WhenUpdateStatus_ThenShouldReturnStatusNoContent()
         {
             // arrange

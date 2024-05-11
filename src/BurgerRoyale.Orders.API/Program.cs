@@ -5,6 +5,7 @@ using BurgerRoyale.Orders.IOC.Configurations;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.OpenApi.Models;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -93,3 +94,7 @@ app.MapControllers();
 ConfigureDatabase.RunMigrations(app);
 
 app.Run();
+
+
+[ExcludeFromCodeCoverage]
+public partial class Program {}

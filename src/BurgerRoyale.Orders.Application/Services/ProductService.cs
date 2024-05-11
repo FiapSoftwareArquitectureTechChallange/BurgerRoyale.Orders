@@ -120,7 +120,7 @@ public class ProductService : IProductService
 			updateProductRequestDTO.Description,
 			updateProductRequestDTO.Price,
 			updateProductRequestDTO.Category
-			);
+		);
 	}
 
 	public async Task RemoveAsync(Guid id)

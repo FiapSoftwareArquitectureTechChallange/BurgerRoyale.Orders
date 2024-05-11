@@ -7,10 +7,12 @@ using BurgerRoyale.Orders.Domain.Helpers;
 using BurgerRoyale.Orders.Domain.Interface.IntegrationServices;
 using BurgerRoyale.Orders.Domain.Interface.Repositories;
 using BurgerRoyale.Orders.Domain.Interface.Services;
+using BurgerRoyale.Orders.UnitTests.Domain.EntitiesMocks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
+using System.Linq.Expressions;
 using Xunit;
 
 namespace BurgerRoyale.Orders.UnitTests.Application.Services;
@@ -70,6 +72,20 @@ public class OrderServiceShould
         _productRepositoryMock
             .Setup(x => x.GetByIdAsync(productId))
             .ReturnsAsync(product);
+
+        _orderRepositoryMock
+            .Setup(x => x.AnyAsync(It.IsAny<Expression<Func<Order, bool>>>()))
+            .ReturnsAsync(true);
+
+        var order = OrderMock.Get();
+        order.SetOrderNumber(1);
+
+        _orderRepositoryMock
+            .Setup(x => x.GetAllAsync())
+            .ReturnsAsync(new List<Order>
+            {
+                order
+            });
 
         CreateOrderProductDTO orderProduct = new CreateOrderProductDTO()
         {
@@ -222,6 +238,85 @@ public class OrderServiceShould
         Assert.Single(orders);
         Assert.Equal(30, orders.FirstOrDefault()?.TotalPrice);
         Assert.Equal(OrderStatus.EmPreparacao.GetDescription(), orders.FirstOrDefault()?.Status);
+
+        #endregion Assert(Then)
+    }
+
+    [Fact]
+    public async Task Get_Order()
+    {
+        #region Arrange(Given)
+
+        // Produto
+        var productId = Guid.NewGuid();
+        var productName = "Test";
+        var productDesc = "Test description";
+        var orderId = Guid.NewGuid();
+        decimal productPrice = 30;
+        int quantity = 1;
+        var productCategory = ProductCategory.Sobremesa;
+
+        var product = new Product(productName, productDesc, productPrice, productCategory);
+
+        // Order product
+        OrderProduct orderProduct = new OrderProduct(orderId, productId, productPrice, quantity, product);
+
+        var userId = Guid.NewGuid();
+        var orderStatus = OrderStatus.EmPreparacao;
+
+        //Pedido
+        Order order = new(userId);
+        order.AddProduct(orderProduct);
+        order.SetStatus(orderStatus);
+
+        _orderRepositoryMock
+            .Setup(x => x.GetOrder(orderId, null))
+            .ReturnsAsync(order);
+
+        #endregion Arrange(Given)
+
+        #region Act(When)
+
+        var orderResponse = await _orderService.GetUserOrderAsync(orderId);
+
+        #endregion Act(When)
+
+        #region Assert(Then)
+
+        _orderRepositoryMock
+            .Verify(
+                repository => repository.GetOrder(orderId, null),
+                Times.Once());
+
+        Assert.NotNull(orderResponse);
+
+        #endregion Assert(Then)
+    }
+
+    [Fact]
+    public async Task GetOrder_UnvalidOrder_ShouldThrowException()
+    {
+        #region Arrange(Given)
+
+        // Produto
+        var orderId = Guid.NewGuid();
+
+        _orderRepositoryMock
+            .Setup(x => x.GetOrder(orderId, null))
+            .ReturnsAsync(null as Order);
+
+        #endregion Arrange(Given)
+
+        #region Act(When)
+
+        var exception = await Record.ExceptionAsync(async () => await _orderService.GetUserOrderAsync(orderId));
+
+        #endregion Act(When)
+
+        #region Assert(Then)
+
+        Assert.NotNull(exception);
+        Assert.Equal("Order doesn't exist.", exception.Message);
 
         #endregion Assert(Then)
     }
