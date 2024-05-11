@@ -28,6 +28,14 @@ spec:
               value: ${JWT_AUDIENCE}
             - name: Jwt__SecretKey
               value: ${JWT_SECRETKEY}
+            - name: AWS__AccessKey
+              value: ${AWS_ACCESS_KEY}
+            - name: AWS__SecretKey
+              value: ${AWS_SECRET_ACCESS_KEY}
+            - name: AWS__SessionToken
+              value: ${AWS_SESSION_TOKEN}
+            - name: AWS__Region
+              value: ${AWS_REGION}
 
           resources:
             requests:
