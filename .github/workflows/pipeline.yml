@@ -41,7 +41,7 @@ jobs:
 
   analize:
     name: SonarCloud analysis
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     needs: build
     steps:
       - name: Set up JDK 17
@@ -61,32 +61,20 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
-      - name: Cache SonarCloud scanner
-        id: cache-sonar-scanner
-        uses: actions/cache@v3
-        with:
-          path: .\.sonar\scanner
-          key: ${{ runner.os }}-sonar-scanner
-          restore-keys: ${{ runner.os }}-sonar-scanner
-
       - name: Install SonarCloud scanner
-        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
-        shell: powershell
         run: |
-          New-Item -Path .\.sonar\scanner -ItemType Directory
-          dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
-          dotnet tool update dotnet-coverage --tool-path .\.sonar\scanner
+          dotnet tool install --global dotnet-sonarscanner
+          dotnet tool install --global dotnet-coverage
 
       - name: Build and analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"BurgerRoyale.Orders" /o:"3soat-burger-royale" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml /d:sonar.exclusions=**/Migrations/**/*.cs,**/Program.cs
+          dotnet-sonarscanner begin /k:"BurgerRoyale.Orders" /o:"3soat-burger-royale" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml /d:sonar.exclusions=**/Migrations/**/*.cs,**/Program.cs
           dotnet build --configuration Release
-          .\.sonar\scanner\dotnet-coverage collect 'dotnet test .\tests\BurgerRoyale.Orders.UnitTests\BurgerRoyale.Orders.UnitTests.csproj' -f xml -o 'coverage.xml'
-          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+          dotnet-coverage collect 'dotnet test .\tests\BurgerRoyale.Orders.UnitTests\BurgerRoyale.Orders.UnitTests.csproj' -f xml -o 'coverage.xml'
+          dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
         
   publishImage:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
