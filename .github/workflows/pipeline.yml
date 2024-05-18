@@ -8,6 +8,7 @@ on:
       - '.gitignore'
   pull_request:
     branches: [ "main", "develop"]
+  workflow_dispatch:
   
 env:
   EKS_CLUSTER_NAME: burger-cluster-eks
@@ -92,6 +93,7 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
+        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
 
     - name: Login to Amazon ECR
       id: login-ecr
@@ -119,6 +121,7 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
+        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
 
     - name: Login to Amazon ECR
       id: login-ecr
