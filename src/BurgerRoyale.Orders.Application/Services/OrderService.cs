@@ -138,10 +138,9 @@ public class OrderService : IOrderService
 
         var order = await _orderRepository.GetOrder(id, userId);
 
-        if (order is null)
-            throw new NotFoundException("Order doesn't exist.");
-
-        return new OrderDTO(order!);
+        return order is null
+            ? throw new NotFoundException("Order doesn't exist.")
+            : new OrderDTO(order!);
     }
 
     public async Task RemoveAsync(Guid id)
@@ -177,10 +176,9 @@ public class OrderService : IOrderService
     {
         var order = await _orderRepository.GetOrder(id);
 
-        if (order is null)
-            throw new NotFoundException("Order doesn't exist.");
-
-        return order;
+        return order is null
+            ? throw new NotFoundException("Order doesn't exist.")
+            : order;
     }
 
     private static void ValidateIfStatusIsTheSame(OrderStatus orderStatus, Order order)
